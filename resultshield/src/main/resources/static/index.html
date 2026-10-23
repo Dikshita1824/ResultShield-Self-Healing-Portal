@@ -1,0 +1,2109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ResultShield | Self-Healing Systems</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #0d1b2a;
+            --panel: #1b263b;
+            --blue: #415a77;
+            --muted: #778da9;
+            --text: #e0e1dd;
+            --neon: #00f5d4;
+            --neon-soft: rgba(0, 245, 212, 0.10);
+            --border: rgba(119, 141, 169, 0.20);
+            --danger: #ff647c;
+            --warning: #ffcc66;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        button, input, select {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        button:focus-visible,
+        input:focus-visible {
+            outline: 2px solid var(--neon);
+            outline-offset: 3px;
+        }
+
+        .app {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+
+        .sidebar {
+            width: 255px;
+            flex-shrink: 0;
+            padding: 25px 16px;
+            background: #091522;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 5px 7px 35px;
+        }
+
+        .brand-icon {
+            width: 45px;
+            height: 45px;
+            display: grid;
+            place-items: center;
+            color: var(--neon);
+            background: var(--neon-soft);
+            border: 1px solid rgba(0, 245, 212, 0.4);
+            border-radius: 14px;
+            box-shadow: 0 0 24px rgba(0, 245, 212, 0.08);
+            font-size: 23px;
+        }
+
+        .brand-name {
+            font-weight: 800;
+            font-size: 20px;
+            letter-spacing: -0.7px;
+        }
+
+        .brand-name span {
+            color: var(--neon);
+        }
+
+        .brand-sub {
+            font-size: 9px;
+            letter-spacing: 2px;
+            color: var(--muted);
+            margin-top: 5px;
+        }
+
+        .nav-heading {
+            color: var(--muted);
+            font-size: 10px;
+            letter-spacing: 2px;
+            font-weight: 700;
+            margin: 20px 10px 12px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            text-align: left;
+            border: 1px solid transparent;
+            color: var(--muted);
+            background: transparent;
+            padding: 13px 12px;
+            border-radius: 10px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+
+        .nav-btn:hover,
+        .nav-btn.active {
+            color: var(--neon);
+            background: var(--neon-soft);
+            border-color: rgba(0, 245, 212, 0.22);
+        }
+
+        .nav-icon {
+            width: 22px;
+            text-align: center;
+            font-size: 17px;
+        }
+
+        .live-tag {
+            margin-left: auto;
+            font-size: 9px;
+            padding: 4px 6px;
+            border-radius: 5px;
+            background: var(--neon-soft);
+            color: var(--neon);
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            border: 1px solid var(--border);
+            background: var(--panel);
+            border-radius: 13px;
+            padding: 15px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            background: var(--neon);
+            box-shadow: 0 0 10px rgba(0, 245, 212, 0.5);
+            margin-right: 7px;
+        }
+
+        .sidebar-bottom strong {
+            font-size: 12px;
+        }
+
+        .sidebar-bottom p {
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.8;
+            margin-top: 10px;
+        }
+
+        /* MAIN */
+
+        .main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .topbar {
+            height: 78px;
+            padding: 0 30px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(9, 21, 34, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .breadcrumb {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .breadcrumb strong {
+            color: var(--text);
+        }
+
+        .operator {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 12px;
+        }
+
+        .avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 11px;
+            display: grid;
+            place-items: center;
+            color: var(--neon);
+            background: var(--panel);
+            border: 1px solid var(--blue);
+            font-weight: 700;
+        }
+
+        .operator small {
+            display: block;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .content {
+            padding: 32px;
+            max-width: 1600px;
+            margin: auto;
+        }
+
+        .page {
+            display: none;
+            animation: appear 0.25s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes appear {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .eyebrow {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: var(--neon);
+            margin-bottom: 12px;
+        }
+
+        .page-heading {
+            font-size: clamp(27px, 3vw, 39px);
+            letter-spacing: -1.5px;
+            margin-bottom: 9px;
+        }
+
+        .page-heading span {
+            color: var(--neon);
+        }
+
+        .page-description {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .heading-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+        }
+
+        /* BUTTONS */
+
+        .btn {
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 11px 15px;
+            font-size: 12px;
+            font-weight: 700;
+            background: var(--panel);
+            color: var(--text);
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            border-color: var(--neon);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            color: #061a20;
+            background: var(--neon);
+            border-color: var(--neon);
+        }
+
+        .btn-primary:hover {
+            background: #5fffe6;
+            box-shadow: 0 0 22px rgba(0, 245, 212, 0.15);
+        }
+
+        .btn-danger {
+            color: var(--danger);
+            border-color: rgba(255, 100, 124, 0.3);
+        }
+
+        .btn-small {
+            padding: 7px 10px;
+            font-size: 11px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* CARDS */
+
+        .grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: linear-gradient(
+                145deg,
+                rgba(27, 38, 59, 0.98),
+                rgba(13, 27, 42, 0.96)
+            );
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 23px;
+            min-width: 0;
+        }
+
+        .card:hover {
+            border-color: rgba(0, 245, 212, 0.3);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .stat-value {
+            font-size: 31px;
+            font-weight: 800;
+            margin: 20px 0 10px;
+            letter-spacing: -1px;
+        }
+
+        .stat-note {
+            font-size: 10px;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .neon-text {
+            color: var(--neon);
+        }
+
+        .dashboard-grid {
+            grid-template-columns: 1.3fr 0.9fr;
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .card-description {
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.7;
+        }
+
+        .service-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .service-row:last-child {
+            border-bottom: 0;
+        }
+
+        .service-name {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .service-detail {
+            color: var(--muted);
+            font-size: 10px;
+            margin-top: 5px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 9px;
+            border-radius: 6px;
+            background: var(--neon-soft);
+            color: var(--neon);
+            font-size: 9px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .badge-warning {
+            color: var(--warning);
+            background: rgba(255, 204, 102, 0.1);
+        }
+
+        .badge-danger {
+            color: var(--danger);
+            background: rgba(255, 100, 124, 0.1);
+        }
+
+        .divider {
+            border: 0;
+            border-top: 1px solid var(--border);
+            margin: 20px 0;
+        }
+
+        /* HEALTH */
+
+        .health-layout {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }
+
+        .health-ring {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: conic-gradient(
+                var(--neon) 0deg 300deg,
+                var(--blue) 300deg 360deg
+            );
+            flex-shrink: 0;
+        }
+
+        .health-ring-inner {
+            width: 109px;
+            height: 109px;
+            border-radius: 50%;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .health-ring-inner strong {
+            font-size: 30px;
+        }
+
+        .health-ring-inner small {
+            font-size: 9px;
+            color: var(--muted);
+            margin-top: 5px;
+        }
+
+        .health-copy strong {
+            font-size: 14px;
+        }
+
+        .health-copy p {
+            font-size: 11px;
+            color: var(--muted);
+            line-height: 1.8;
+            margin-top: 9px;
+        }
+
+        /* FORMS */
+
+        .form {
+            display: grid;
+            gap: 15px;
+        }
+
+        .form-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .field label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .field input {
+            width: 100%;
+            min-width: 0;
+            padding: 13px;
+            border: 1px solid var(--blue);
+            border-radius: 9px;
+            background: #0a1725;
+            color: var(--text);
+            outline: none;
+        }
+
+        .field input:focus {
+            border-color: var(--neon);
+            box-shadow: 0 0 0 3px rgba(0, 245, 212, 0.07);
+        }
+
+        .field input::placeholder {
+            color: #657b94;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+
+        /* RESULT */
+
+        .result-box {
+            margin-top: 22px;
+            padding: 25px;
+            border: 1px solid rgba(0, 245, 212, 0.25);
+            border-radius: 14px;
+            background: linear-gradient(
+                130deg,
+                rgba(0, 245, 212, 0.07),
+                rgba(27, 38, 59, 0.45)
+            );
+        }
+
+        .result-name {
+            font-size: 23px;
+            font-weight: 800;
+            margin: 20px 0 9px;
+        }
+
+        .result-meta {
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.9;
+        }
+
+        .result-marks {
+            font-size: 42px;
+            font-weight: 800;
+            color: var(--neon);
+            margin: 18px 0;
+        }
+
+        .result-marks small {
+            font-size: 16px;
+            color: var(--muted);
+        }
+
+        /* TABLE */
+
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 18px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 12px;
+            min-width: 470px;
+        }
+
+        th {
+            padding: 14px;
+            color: var(--muted);
+            font-weight: 600;
+            background: rgba(9, 21, 34, 0.6);
+        }
+
+        td {
+            padding: 14px;
+            border-top: 1px solid var(--border);
+        }
+
+        tbody tr:hover {
+            background: rgba(0, 245, 212, 0.035);
+        }
+
+        /* INCIDENTS */
+
+        .incident {
+            display: flex;
+            align-items: flex-start;
+            gap: 13px;
+            padding: 17px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .incident:last-child {
+            border-bottom: 0;
+        }
+
+        .incident-mark {
+            width: 35px;
+            height: 35px;
+            display: grid;
+            place-items: center;
+            background: var(--panel);
+            border-radius: 10px;
+            flex-shrink: 0;
+        }
+
+        .incident strong {
+            font-size: 12px;
+        }
+
+        .incident p {
+            font-size: 11px;
+            color: var(--muted);
+            line-height: 1.8;
+            margin-top: 6px;
+            overflow-wrap: anywhere;
+        }
+
+        .incident-time {
+            margin-left: auto;
+            color: var(--muted);
+            font-size: 10px;
+            white-space: nowrap;
+        }
+
+        .empty-state {
+            padding: 24px 5px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .chaos-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .chaos-card {
+            border: 1px solid var(--border);
+            border-radius: 13px;
+            padding: 21px;
+            background: rgba(27, 38, 59, 0.65);
+        }
+
+        .chaos-card h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .chaos-card p {
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.8;
+            margin-bottom: 18px;
+        }
+
+        .notice {
+            border: 1px solid rgba(255, 204, 102, 0.25);
+            background: rgba(255, 204, 102, 0.06);
+            color: var(--warning);
+            border-radius: 10px;
+            padding: 13px;
+            font-size: 11px;
+            line-height: 1.8;
+            margin-bottom: 18px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 22px;
+            right: 22px;
+            z-index: 10;
+            max-width: min(400px, calc(100vw - 44px));
+            padding: 15px 18px;
+            background: #162a3b;
+            border: 1px solid var(--neon);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 12px;
+            line-height: 1.7;
+            box-shadow: 0 0 25px rgba(0, 245, 212, 0.1);
+            display: none;
+        }
+
+        .toast.show {
+            display: block;
+            animation: appear 0.2s ease;
+        }
+
+        .footer {
+            padding: 25px 0 5px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        @media (max-width: 1100px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 750px) {
+            .app {
+                display: block;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 12px;
+                border-right: 0;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .brand {
+                padding: 5px 5px 15px;
+            }
+
+            .nav-heading,
+            .sidebar-bottom {
+                display: none;
+            }
+
+            .nav-list {
+                display: flex;
+                gap: 6px;
+                overflow-x: auto;
+                padding-bottom: 3px;
+            }
+
+            .nav-btn {
+                width: auto;
+                white-space: nowrap;
+                margin: 0;
+                padding: 10px;
+                flex-shrink: 0;
+            }
+
+            .topbar {
+                height: 60px;
+                padding: 0 16px;
+            }
+
+            .content {
+                padding: 22px 16px;
+            }
+
+            .stats-grid {
+                gap: 10px;
+            }
+
+            .card {
+                padding: 17px;
+            }
+
+            .stat-value {
+                font-size: 25px;
+            }
+
+            .chaos-grid,
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .incident-time {
+                display: none;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .operator small {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="app">
+
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">⬡</div>
+            <div>
+                <div class="brand-name">Result<span>Shield</span></div>
+                <div class="brand-sub">SELF-HEALING SYSTEMS</div>
+            </div>
+        </div>
+
+        <div class="nav-heading">WORKSPACE</div>
+
+        <nav class="nav-list">
+            <button class="nav-btn active" data-page="overview">
+                <span class="nav-icon">▦</span> Overview
+            </button>
+
+            <button class="nav-btn" data-page="portal">
+                <span class="nav-icon">♧</span> Student Portal
+            </button>
+
+            <button class="nav-btn" data-page="students">
+                <span class="nav-icon">♙</span> Student Management
+            </button>
+
+            <div class="nav-heading">RELIABILITY</div>
+
+            <button class="nav-btn" data-page="health">
+                <span class="nav-icon">⌁</span> System Health
+                <span class="live-tag">LIVE</span>
+            </button>
+
+            <button class="nav-btn" data-page="incidents">
+                <span class="nav-icon">⚠</span> Incidents
+            </button>
+
+            <button class="nav-btn" data-page="chaos">
+                <span class="nav-icon">⚗</span> Chaos Lab
+            </button>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div>
+                <span class="status-dot" id="sidebarDot"></span>
+                <strong id="sidebarStatus">Checking backend...</strong>
+            </div>
+            <p id="sidebarMessage">
+                Checking application availability.
+            </p>
+            <p class="neon-text">PROJECT BUILD · V2.0</p>
+        </div>
+    </aside>
+
+    <main class="main">
+
+        <header class="topbar">
+            <div class="breadcrumb">
+                ResultShield &nbsp; / &nbsp;
+                <strong id="breadcrumb">Overview</strong>
+            </div>
+
+            <div class="operator">
+                <button class="btn" id="refreshBtn" title="Refresh data">
+                    ↻ Refresh
+                </button>
+                <div class="avatar">AD</div>
+                <div>
+                    <strong>Administrator</strong>
+                    <small>System operator</small>
+                </div>
+            </div>
+        </header>
+
+        <div class="content">
+
+            <!-- OVERVIEW -->
+
+            <section class="page active" id="page-overview">
+
+                <div class="heading-row">
+                    <div>
+                        <div class="eyebrow">SYSTEM OVERVIEW / 01</div>
+                        <h1 class="page-heading">Command Center<span>.</span></h1>
+                        <p class="page-description">
+                            Monitor your university result infrastructure and reliability.
+                        </p>
+                    </div>
+
+                    <button class="btn btn-primary" data-goto="health">
+                        ⌁ &nbsp; View system health
+                    </button>
+                </div>
+
+                <div class="grid stats-grid">
+
+                    <div class="card">
+                        <div class="stat-label">Registered Students</div>
+                        <div class="stat-value" id="studentCount">—</div>
+                        <div class="stat-note">Records returned by the backend</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="stat-label">System Status</div>
+                        <div class="stat-value neon-text" id="systemStatus">Checking</div>
+                        <div class="stat-note">Based on the /health endpoint</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="stat-label">Open Incidents</div>
+                        <div class="stat-value" id="incidentCount">0</div>
+                        <div class="stat-note">Recorded by this dashboard session</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="stat-label">Recovery Events</div>
+                        <div class="stat-value" id="recoveryCount">0</div>
+                        <div class="stat-note">Confirmed recoveries only</div>
+                    </div>
+
+                </div>
+
+                <div class="grid dashboard-grid">
+
+                    <div class="card">
+                        <h2 class="card-title">Infrastructure Health</h2>
+                        <p class="card-description">
+                            Backend availability and connectivity checks.
+                        </p>
+
+                        <div class="health-layout">
+                            <div class="health-ring" id="healthRing">
+                                <div class="health-ring-inner">
+                                    <strong id="healthScore">—</strong>
+                                    <small>API STATUS</small>
+                                </div>
+                            </div>
+
+                            <div class="health-copy">
+                                <strong id="healthHeadline">Waiting for health check</strong>
+                                <p id="healthDescription">
+                                    Checking whether the backend responds.
+                                </p>
+                                <button class="btn btn-primary" id="healthCheckBtn">
+                                    Run health check
+                                </button>
+                            </div>
+                        </div>
+
+                        <hr class="divider">
+
+                        <div class="service-row">
+                            <div>
+                                <div class="service-name">Spring Boot API</div>
+                                <div class="service-detail">HTTP health endpoint</div>
+                            </div>
+                            <span class="badge" id="apiBadge">CHECKING</span>
+                        </div>
+
+                        <div class="service-row">
+                            <div>
+                                <div class="service-name">Student Database API</div>
+                                <div class="service-detail">Student repository endpoint</div>
+                            </div>
+                            <span class="badge" id="dbBadge">CHECKING</span>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2 class="card-title">Service Monitor</h2>
+                        <p class="card-description">Application component status</p>
+
+                        <div class="service-row">
+                            <div>
+                                <div class="service-name">Web application</div>
+                                <div class="service-detail">Browser interface · Port 8080</div>
+                            </div>
+                            <span class="badge">LOADED</span>
+                        </div>
+
+                        <div class="service-row">
+                            <div>
+                                <div class="service-name">Spring Boot backend</div>
+                                <div class="service-detail">GET /health</div>
+                            </div>
+                            <span class="badge" id="backendBadge">CHECKING</span>
+                        </div>
+
+                        <div class="service-row">
+                            <div>
+                                <div class="service-name">MongoDB student records</div>
+                                <div class="service-detail">GET /admin/students</div>
+                            </div>
+                            <span class="badge" id="mongoBadge">CHECKING</span>
+                        </div>
+
+                        <hr class="divider">
+
+                        <h2 class="card-title">Recent Activity</h2>
+                        <div id="recentActivity" class="empty-state">
+                            No dashboard events recorded yet.
+                        </div>
+
+                        <button class="btn" data-goto="incidents">
+                            View incident log →
+                        </button>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- STUDENT PORTAL -->
+
+            <section class="page" id="page-portal">
+
+                <div class="heading-row">
+                    <div>
+                        <div class="eyebrow">STUDENT SERVICES / 02</div>
+                        <h1 class="page-heading">Student Portal<span>.</span></h1>
+                        <p class="page-description">
+                            Access examination results using your roll number.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">Find your result</h2>
+                    <p class="card-description">
+                        Enter the roll number assigned to your examination record.
+                    </p>
+
+                    <form class="form" id="resultForm" style="margin-top:22px">
+                        <div class="field">
+                            <label for="searchRoll">ROLL NUMBER</label>
+                            <input
+                                id="searchRoll"
+                                placeholder="Enter roll number, e.g. 101"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-actions">
+                            <button class="btn btn-primary" type="submit">
+                                Search result →
+                            </button>
+                            <button class="btn" type="reset">Clear</button>
+                        </div>
+                    </form>
+
+                    <div id="resultOutput" aria-live="polite"></div>
+                </div>
+            </section>
+
+            <!-- STUDENT MANAGEMENT -->
+
+            <section class="page" id="page-students">
+
+                <div class="heading-row">
+                    <div>
+                        <div class="eyebrow">ADMINISTRATION / 03</div>
+                        <h1 class="page-heading">Student Management<span>.</span></h1>
+                        <p class="page-description">
+                            Manage examination records stored in MongoDB.
+                        </p>
+                    </div>
+
+                    <button class="btn" id="loadStudentsBtn">↻ Load records</button>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title" id="studentFormTitle">Add student record</h2>
+                    <p class="card-description">
+                        Enter a unique roll number, student name and marks between 0 and 100.
+                    </p>
+
+                    <form class="form" id="studentForm" style="margin-top:22px">
+
+                        <div class="grid form-grid">
+                            <div class="field">
+                                <label for="studentRoll">ROLL NUMBER</label>
+                                <input id="studentRoll" required placeholder="e.g. 101">
+                            </div>
+
+                            <div class="field">
+                                <label for="studentName">STUDENT NAME</label>
+                                <input id="studentName" required placeholder="Full name">
+                            </div>
+
+                            <div class="field">
+                                <label for="studentMarks">MARKS (0–100)</label>
+                                <input
+                                    id="studentMarks"
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    required
+                                    placeholder="e.g. 85"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button class="btn btn-primary" type="submit" id="saveStudentBtn">
+                                + Add student
+                            </button>
+                            <button class="btn" type="button" id="cancelEditBtn" hidden>
+                                Cancel edit
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card" style="margin-top:20px">
+                    <h2 class="card-title">Student records</h2>
+                    <p class="card-description" id="tableMessage">
+                        Load records to display the current database contents.
+                    </p>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ROLL NUMBER</th>
+                                    <th>STUDENT NAME</th>
+                                    <th>MARKS</th>
+                                    <th>RESULT</th>
+                                    <th>ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentsTable">
+                                <tr>
+                                    <td colspan="5">Loading records...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SYSTEM HEALTH -->
+
+            <section class="page" id="page-health">
+
+                <div class="heading-row">
+                    <div>
+                        <div class="eyebrow">RELIABILITY / 04</div>
+                        <h1 class="page-heading">System Health<span>.</span></h1>
+                        <p class="page-description">
+                            Inspect backend availability and response time.
+                        </p>
+                    </div>
+
+                    <button class="btn btn-primary" id="runDetailedHealth">
+                        Run health check
+                    </button>
+                </div>
+
+                <div class="grid stats-grid">
+                    <div class="card">
+                        <div class="stat-label">API Availability</div>
+                        <div class="stat-value neon-text" id="healthPageStatus">—</div>
+                        <div class="stat-note">Last health check</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="stat-label">Response Time</div>
+                        <div class="stat-value" id="responseTime">—</div>
+                        <div class="stat-note">Measured browser request time</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="stat-label">Successful Checks</div>
+                        <div class="stat-value" id="successfulChecks">0</div>
+                        <div class="stat-note">This dashboard session</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="stat-label">Failed Checks</div>
+                        <div class="stat-value" id="failedChecks">0</div>
+                        <div class="stat-note">This dashboard session</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">Health check history</h2>
+                    <p class="card-description">
+                        Observations made by this browser session. These checks do not restart the backend.
+                    </p>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>TIME</th>
+                                    <th>ENDPOINT</th>
+                                    <th>STATUS</th>
+                                    <th>RESPONSE TIME</th>
+                                </tr>
+                            </thead>
+                            <tbody id="healthHistory">
+                                <tr>
+                                    <td colspan="4">No health checks recorded yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- INCIDENTS -->
+
+            <section class="page" id="page-incidents">
+
+                <div class="heading-row">
+                    <div>
+                        <div class="eyebrow">RELIABILITY LOGS / 05</div>
+                        <h1 class="page-heading">Incident Center<span>.</span></h1>
+                        <p class="page-description">
+                            Review observations and actions recorded by this dashboard.
+                        </p>
+                    </div>
+
+                    <button class="btn" id="clearIncidentsBtn">Clear session log</button>
+                </div>
+
+                <div class="grid stats-grid">
+                    <div class="card">
+                        <div class="stat-label">Recorded Events</div>
+                        <div class="stat-value" id="totalEvents">0</div>
+                        <div class="stat-note">Current session</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="stat-label">Open Incidents</div>
+                        <div class="stat-value" id="openEvents">0</div>
+                        <div class="stat-note">Failed checks without confirmed recovery</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="stat-label">Confirmed Recoveries</div>
+                        <div class="stat-value neon-text" id="confirmedRecoveries">0</div>
+                        <div class="stat-note">Successful follow-up health checks</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="stat-label">Logging Status</div>
+                        <div class="stat-value" style="font-size:20px">SESSION</div>
+                        <div class="stat-note">Not persisted to the backend yet</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">Incident timeline</h2>
+                    <p class="card-description">
+                        Each entry shows what the browser observed. Actual automatic recovery requires backend implementation.
+                    </p>
+
+                    <div id="incidentList">
+                        <div class="empty-state">No incidents recorded.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CHAOS LAB -->
+
+            <section class="page" id="page-chaos">
+
+                <div class="heading-row">
+                    <div>
+                        <div class="eyebrow">RESILIENCE TESTING / 06</div>
+                        <h1 class="page-heading">Chaos Lab<span>.</span></h1>
+                        <p class="page-description">
+                            Prepare and inspect controlled resilience tests.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="notice">
+                    SAFETY NOTICE: These buttons currently record test requests in the dashboard only.
+                    They do not crash the backend, disconnect MongoDB or create real traffic load.
+                    No recovery is counted from a simulated event.
+                </div>
+
+                <div class="grid chaos-grid">
+
+                    <div class="chaos-card">
+                        <h3>01 / Backend availability</h3>
+                        <p>
+                            Check whether the application health endpoint responds.
+                            This is a normal health check, not a crash injection.
+                        </p>
+                        <button class="btn btn-primary" id="chaosHealthBtn">
+                            Check backend
+                        </button>
+                    </div>
+
+                    <div class="chaos-card">
+                        <h3>02 / Database connectivity</h3>
+                        <p>
+                            Test the student records endpoint to observe whether database-backed access works.
+                        </p>
+                        <button class="btn" id="chaosDatabaseBtn">
+                            Test database access
+                        </button>
+                    </div>
+
+                    <div class="chaos-card">
+                        <h3>03 / Transient connection failure</h3>
+                        <p>
+                            Planned test: simulate a temporary database connection issue and verify retry behaviour.
+                            Backend retry logic is not yet connected to this button.
+                        </p>
+                        <button class="btn" id="chaosRetryBtn">
+                            Record planned test
+                        </button>
+                    </div>
+
+                    <div class="chaos-card">
+                        <h3>04 / Traffic spike</h3>
+                        <p>
+                            Planned test: send controlled concurrent requests and measure response times.
+                            Rate limiting and load tests must be implemented separately.
+                        </p>
+                        <button class="btn" id="chaosTrafficBtn">
+                            Record planned test
+                        </button>
+                    </div>
+
+                    <div class="chaos-card">
+                        <h3>05 / Invalid student record</h3>
+                        <p>
+                            Planned test: validate a deliberately invalid record and verify quarantine behaviour.
+                            This button does not alter any database record.
+                        </p>
+                        <button class="btn" id="chaosDataBtn">
+                            Record planned test
+                        </button>
+                    </div>
+
+                    <div class="chaos-card">
+                        <h3>Test activity</h3>
+                        <p>
+                            View the result of the latest check or planned test.
+                        </p>
+                        <div class="result-meta" id="chaosOutput" aria-live="polite">
+                            No test run yet.
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <footer class="footer">
+                ResultShield · Self-Healing University Result Portal · BCA Project
+            </footer>
+
+        </div>
+    </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+    "use strict";
+
+    const API = {
+        health: "/health",
+        students: "/admin/students",
+        result: "/result"
+    };
+
+    const state = {
+        students: [],
+        editingRoll: null,
+        incidents: [],
+        healthHistory: [],
+        successfulChecks: 0,
+        failedChecks: 0,
+        confirmedRecoveries: 0,
+        openIncidents: 0,
+        lastHealthFailed: false,
+        toastTimer: null
+    };
+
+    const $ = id => document.getElementById(id);
+
+    function escapeHtml(value) {
+        return String(value ?? "").replace(/[&<>"']/g, char => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+        })[char]);
+    }
+
+    function now() {
+        return new Date().toLocaleTimeString();
+    }
+
+    function showToast(message) {
+        const toast = $("toast");
+        toast.textContent = message;
+        toast.classList.add("show");
+
+        clearTimeout(state.toastTimer);
+        state.toastTimer = setTimeout(() => {
+            toast.classList.remove("show");
+        }, 3500);
+    }
+
+    async function apiRequest(url, options = {}, timeoutMs = 8000) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+        try {
+            const response = await fetch(url, {
+                ...options,
+                signal: controller.signal,
+                headers: {
+                    ...(options.body ? { "Content-Type": "application/json" } : {}),
+                    ...options.headers
+                }
+            });
+
+            const text = await response.text();
+
+            if (!response.ok) {
+                throw new Error(
+                    text || `Request failed with HTTP ${response.status}`
+                );
+            }
+
+            if (!text) return null;
+
+            try {
+                return JSON.parse(text);
+            } catch {
+                return text;
+            }
+        } catch (error) {
+            if (error.name === "AbortError") {
+                throw new Error("Request timed out.");
+            }
+
+            throw error;
+        } finally {
+            clearTimeout(timer);
+        }
+    }
+
+    function setBadge(id, status, kind = "normal") {
+        const el = $(id);
+        if (!el) return;
+
+        el.textContent = status;
+        el.className = "badge";
+
+        if (kind === "warning") el.classList.add("badge-warning");
+        if (kind === "danger") el.classList.add("badge-danger");
+    }
+
+    function addIncident(title, details, kind = "info") {
+        state.incidents.unshift({
+            id: Date.now() + Math.random(),
+            title,
+            details,
+            kind,
+            time: now()
+        });
+
+        renderIncidents();
+        updateCounters();
+    }
+
+    function renderIncidents() {
+        const container = $("incidentList");
+        const recent = $("recentActivity");
+
+        if (state.incidents.length === 0) {
+            container.innerHTML =
+                '<div class="empty-state">No incidents recorded.</div>';
+
+            recent.innerHTML =
+                '<div class="empty-state">No dashboard events recorded yet.</div>';
+            return;
+        }
+
+        container.innerHTML = state.incidents.map(item => {
+            const icon = item.kind === "danger" ? "⚠"
+                : item.kind === "success" ? "✓" : "●";
+
+            return `
+                <div class="incident">
+                    <div class="incident-mark">${icon}</div>
+                    <div>
+                        <strong>${escapeHtml(item.title)}</strong>
+                        <p>${escapeHtml(item.details)}</p>
+                    </div>
+                    <div class="incident-time">${escapeHtml(item.time)}</div>
+                </div>
+            `;
+        }).join("");
+
+        recent.innerHTML = state.incidents.slice(0, 3).map(item => `
+            <div class="incident">
+                <div class="incident-mark">●</div>
+                <div>
+                    <strong>${escapeHtml(item.title)}</strong>
+                    <p>${escapeHtml(item.details)}</p>
+                </div>
+            </div>
+        `).join("");
+    }
+
+    function updateCounters() {
+        $("incidentCount").textContent = state.openIncidents;
+        $("recoveryCount").textContent = state.confirmedRecoveries;
+
+        $("totalEvents").textContent = state.incidents.length;
+        $("openEvents").textContent = state.openIncidents;
+        $("confirmedRecoveries").textContent = state.confirmedRecoveries;
+    }
+
+    function renderHealthHistory() {
+        $("healthHistory").innerHTML = state.healthHistory.length
+            ? state.healthHistory.slice(0, 15).map(item => `
+                <tr>
+                    <td>${escapeHtml(item.time)}</td>
+                    <td>${escapeHtml(item.endpoint)}</td>
+                    <td>
+                        <span class="badge ${item.ok ? "" : "badge-danger"}">
+                            ${item.ok ? "SUCCESS" : "FAILED"}
+                        </span>
+                    </td>
+                    <td>${escapeHtml(item.duration)} ms</td>
+                </tr>
+            `).join("")
+            : '<tr><td colspan="4">No health checks recorded yet.</td></tr>';
+    }
+
+    async function checkHealth() {
+        const start = performance.now();
+
+        try {
+            const result = await apiRequest(API.health);
+            const duration = Math.round(performance.now() - start);
+
+            const healthy = typeof result === "string"
+                ? result.toLowerCase().includes("healthy")
+                : result?.status?.toLowerCase() === "healthy"
+                    || result?.status?.toLowerCase() === "up";
+
+            if (!healthy) {
+                throw new Error("Health endpoint returned an unexpected response.");
+            }
+
+            state.successfulChecks++;
+
+            if (state.lastHealthFailed) {
+                state.confirmedRecoveries++;
+                state.openIncidents = Math.max(0, state.openIncidents - 1);
+
+                addIncident(
+                    "Service responding again",
+                    `A subsequent health check succeeded in ${duration} ms. The dashboard observed recovery; it did not perform the recovery itself.`,
+                    "success"
+                );
+            }
+
+            state.lastHealthFailed = false;
+
+            $("systemStatus").textContent = "Healthy";
+            $("systemStatus").className = "stat-value neon-text";
+            $("healthPageStatus").textContent = "ONLINE";
+            $("responseTime").textContent = duration + " ms";
+            $("healthScore").textContent = "UP";
+            $("healthHeadline").textContent = "Health endpoint responding";
+            $("healthDescription").textContent =
+                `Successful HTTP request. Measured response time: ${duration} ms.`;
+
+            $("healthRing").style.background =
+                "conic-gradient(var(--neon) 0deg 360deg, var(--blue) 360deg)";
+
+            $("sidebarStatus").textContent = "Backend responding";
+            $("sidebarMessage").textContent =
+                "The latest health check succeeded.";
+
+            $("sidebarDot").style.background = "var(--neon)";
+
+            setBadge("apiBadge", "ONLINE");
+            setBadge("backendBadge", "ONLINE");
+
+            state.healthHistory.unshift({
+                time: now(),
+                endpoint: API.health,
+                ok: true,
+                duration
+            });
+
+        } catch (error) {
+            const duration = Math.round(performance.now() - start);
+
+            state.failedChecks++;
+
+            if (!state.lastHealthFailed) {
+                state.openIncidents++;
+
+                addIncident(
+                    "Health check failed",
+                    `Detected: ${error.message}. Diagnosed: backend response unavailable or invalid. Automatic recovery has not been performed by this dashboard.`,
+                    "danger"
+                );
+            }
+
+            state.lastHealthFailed = true;
+
+            $("systemStatus").textContent = "Offline";
+            $("systemStatus").className = "stat-value";
+            $("systemStatus").style.color = "var(--danger)";
+
+            $("healthPageStatus").textContent = "OFFLINE";
+            $("responseTime").textContent = duration + " ms";
+            $("healthScore").textContent = "DOWN";
+            $("healthHeadline").textContent = "Health check failed";
+            $("healthDescription").textContent = error.message;
+
+            $("healthRing").style.background =
+                "conic-gradient(var(--danger) 0deg 360deg)";
+
+            $("sidebarStatus").textContent = "Backend unavailable";
+            $("sidebarMessage").textContent =
+                "The latest health check failed. Check the server terminal.";
+
+            $("sidebarDot").style.background = "var(--danger)";
+
+            setBadge("apiBadge", "FAILED", "danger");
+            setBadge("backendBadge", "FAILED", "danger");
+
+            state.healthHistory.unshift({
+                time: now(),
+                endpoint: API.health,
+                ok: false,
+                duration
+            });
+
+        } finally {
+            $("successfulChecks").textContent = state.successfulChecks;
+            $("failedChecks").textContent = state.failedChecks;
+
+            renderHealthHistory();
+            updateCounters();
+        }
+
+        return !state.lastHealthFailed;
+    }
+
+    async function loadStudents() {
+        $("tableMessage").textContent = "Loading records...";
+
+        try {
+            const data = await apiRequest(API.students);
+
+            if (!Array.isArray(data)) {
+                throw new Error("Unexpected student list response.");
+            }
+
+            state.students = data;
+            renderStudents();
+
+            $("studentCount").textContent = data.length;
+            $("tableMessage").textContent =
+                `${data.length} record(s) returned by the backend.`;
+
+            setBadge("dbBadge", "API RESPONDING");
+            setBadge("mongoBadge", "API RESPONDING");
+
+            return true;
+
+        } catch (error) {
+            $("tableMessage").textContent = error.message;
+            $("studentsTable").innerHTML = `
+                <tr>
+                    <td colspan="5">
+                        Could not load student records. Check the backend and MongoDB.
+                    </td>
+                </tr>
+            `;
+
+            $("studentCount").textContent = "—";
+
+            setBadge("dbBadge", "UNAVAILABLE", "danger");
+            setBadge("mongoBadge", "UNAVAILABLE", "danger");
+
+            return false;
+        }
+    }
+
+    function renderStudents() {
+        const tbody = $("studentsTable");
+
+        if (state.students.length === 0) {
+            tbody.innerHTML =
+                '<tr><td colspan="5">No student records found.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = state.students.map(student => {
+            const roll = String(student.rollNumber ?? student.id ?? "");
+            const name = String(student.name ?? "");
+            const marks = Number(student.marks);
+
+            return `
+                <tr>
+                    <td>${escapeHtml(roll)}</td>
+                    <td>${escapeHtml(name)}</td>
+                    <td>${escapeHtml(marks)}</td>
+                    <td>
+                        <span class="badge ${marks < 33 ? "badge-danger" : ""}">
+                            ${marks < 33 ? "FAIL" : "PASS"}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="actions">
+                            <button
+                                class="btn btn-small"
+                                data-action="edit"
+                                data-roll="${escapeHtml(roll)}"
+                            >Edit</button>
+
+                            <button
+                                class="btn btn-small btn-danger"
+                                data-action="delete"
+                                data-roll="${escapeHtml(roll)}"
+                            >Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join("");
+    }
+
+    function resetStudentForm() {
+        state.editingRoll = null;
+
+        $("studentForm").reset();
+        $("studentRoll").disabled = false;
+
+        $("studentFormTitle").textContent = "Add student record";
+        $("saveStudentBtn").textContent = "+ Add student";
+        $("cancelEditBtn").hidden = true;
+    }
+
+    async function saveStudent(event) {
+        event.preventDefault();
+
+        const roll = $("studentRoll").value.trim();
+        const name = $("studentName").value.trim();
+        const marks = Number($("studentMarks").value);
+
+        if (!roll || !name || !Number.isInteger(marks) || marks < 0 || marks > 100) {
+            showToast("Enter a valid roll number, name and whole-number marks from 0 to 100.");
+            return;
+        }
+
+        const editing = state.editingRoll !== null;
+
+        const payload = { name, marks };
+
+        if (!editing) {
+            payload.rollNumber = roll;
+        }
+
+        const url = editing
+            ? `${API.students}/${encodeURIComponent(state.editingRoll)}`
+            : API.students;
+
+        try {
+            await apiRequest(url, {
+                method: editing ? "PUT" : "POST",
+                body: JSON.stringify(payload)
+            });
+
+            showToast(editing ? "Student record updated." : "Student record added.");
+
+            addIncident(
+                editing ? "Student record updated" : "Student record added",
+                `Record ${roll} was saved successfully.`
+            );
+
+            resetStudentForm();
+            await loadStudents();
+
+        } catch (error) {
+            showToast(`Save failed: ${error.message}`);
+        }
+    }
+
+    function editStudent(roll) {
+        const student = state.students.find(
+            item => String(item.rollNumber ?? item.id) === String(roll)
+        );
+
+        if (!student) {
+            showToast("Student record not found in the loaded list.");
+            return;
+        }
+
+        state.editingRoll = String(roll);
+
+        $("studentRoll").value = roll;
+        $("studentName").value = student.name ?? "";
+        $("studentMarks").value = student.marks ?? "";
+
+        $("studentRoll").disabled = true;
+        $("studentFormTitle").textContent = "Update student record";
+        $("saveStudentBtn").textContent = "Save changes";
+        $("cancelEditBtn").hidden = false;
+
+        $("studentForm").scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+    }
+
+    async function deleteStudent(roll) {
+        const confirmed = confirm(
+            `Delete student record ${roll}? This action changes the database.`
+        );
+
+        if (!confirmed) return;
+
+        try {
+            await apiRequest(
+                `${API.students}/${encodeURIComponent(roll)}`,
+                { method: "DELETE" }
+            );
+
+            showToast(`Student ${roll} deleted.`);
+
+            addIncident(
+                "Student record deleted",
+                `Record ${roll} was deleted through the admin interface.`
+            );
+
+            if (state.editingRoll === String(roll)) {
+                resetStudentForm();
+            }
+
+            await loadStudents();
+
+        } catch (error) {
+            showToast(`Delete failed: ${error.message}`);
+        }
+    }
+
+    async function searchResult(event) {
+        event.preventDefault();
+
+        const roll = $("searchRoll").value.trim();
+
+        if (!roll) {
+            showToast("Enter a roll number first.");
+            return;
+        }
+
+        const output = $("resultOutput");
+
+        output.innerHTML =
+            '<div class="empty-state">Searching examination records...</div>';
+
+        try {
+            const result = await apiRequest(
+                `${API.result}?rollNumber=${encodeURIComponent(roll)}`
+            );
+
+            const marks = Number(result.marks);
+            const name = result.name ?? "Student";
+            const resultRoll = result.rollNumber ?? roll;
+
+            output.innerHTML = `
+                <div class="result-box">
+                    <span class="badge">RESULT FOUND</span>
+                    <div class="result-name">${escapeHtml(name)}</div>
+                    <p class="result-meta">University examination record</p>
+                    <p class="result-meta">
+                        Roll number: <strong>${escapeHtml(resultRoll)}</strong>
+                    </p>
+                    <div class="result-marks">
+                        ${escapeHtml(marks)}<small> / 100</small>
+                    </div>
+                    <span class="badge ${marks < 33 ? "badge-danger" : ""}">
+                        ${marks < 33 ? "FAIL" : "PASS"}
+                    </span>
+                </div>
+            `;
+
+        } catch (error) {
+            output.innerHTML = `
+                <div class="result-box" style="border-color:rgba(255,100,124,.35)">
+                    <span class="badge badge-danger">RESULT UNAVAILABLE</span>
+                    <div class="result-name">No result displayed</div>
+                    <p class="result-meta">${escapeHtml(error.message)}</p>
+                    <p class="result-meta">
+                        Check the roll number or verify database connectivity.
+                    </p>
+                </div>
+            `;
+        }
+    }
+
+    function navigate(page) {
+        const target = document.getElementById(`page-${page}`);
+        if (!target) return;
+
+        document.querySelectorAll(".page").forEach(section => {
+            section.classList.remove("active");
+        });
+
+        target.classList.add("active");
+
+        document.querySelectorAll(".nav-btn").forEach(button => {
+            button.classList.toggle("active", button.dataset.page === page);
+        });
+
+        const labels = {
+            overview: "Overview",
+            portal: "Student Portal",
+            students: "Student Management",
+            health: "System Health",
+            incidents: "Incidents",
+            chaos: "Chaos Lab"
+        };
+
+        $("breadcrumb").textContent = labels[page] ?? "Overview";
+
+        if (page === "students") loadStudents();
+        if (page === "health") checkHealth();
+    }
+
+    async function runDatabaseCheck() {
+        const success = await loadStudents();
+
+        if (success) {
+            $("chaosOutput").textContent =
+                "Student records endpoint responded. This does not independently prove every MongoDB health metric.";
+            addIncident(
+                "Database-backed endpoint checked",
+                "The student records endpoint returned a list successfully."
+            );
+        } else {
+            $("chaosOutput").textContent =
+                "Student records endpoint failed. Check the backend logs and MongoDB connectivity.";
+            addIncident(
+                "Database-backed endpoint check failed",
+                "The student records endpoint did not return a usable list.",
+                "danger"
+            );
+        }
+    }
+
+    function recordPlannedTest(title, detail) {
+        addIncident(title, detail);
+
+        $("chaosOutput").textContent =
+            `${title}: recorded as a planned test only. No failure was injected and no recovery was performed.`;
+
+        showToast("Planned test recorded. No system failure was injected.");
+    }
+
+    // NAVIGATION
+
+    document.querySelectorAll(".nav-btn").forEach(button => {
+        button.addEventListener("click", () => navigate(button.dataset.page));
+    });
+
+    document.querySelectorAll("[data-goto]").forEach(button => {
+        button.addEventListener("click", () => navigate(button.dataset.goto));
+    });
+
+    // STUDENT PORTAL
+
+    $("resultForm").addEventListener("submit", searchResult);
+
+    $("resultForm").addEventListener("reset", () => {
+        $("resultOutput").innerHTML = "";
+    });
+
+    // STUDENT MANAGEMENT
+
+    $("studentForm").addEventListener("submit", saveStudent);
+
+    $("cancelEditBtn").addEventListener("click", resetStudentForm);
+
+    $("loadStudentsBtn").addEventListener("click", loadStudents);
+
+    $("studentsTable").addEventListener("click", event => {
+        const button = event.target.closest("button[data-action]");
+        if (!button) return;
+
+        const roll = button.dataset.roll;
+
+        if (button.dataset.action === "edit") editStudent(roll);
+        if (button.dataset.action === "delete") deleteStudent(roll);
+    });
+
+    // HEALTH
+
+    $("refreshBtn").addEventListener("click", async () => {
+        await checkHealth();
+        await loadStudents();
+        showToast("Dashboard refresh completed.");
+    });
+
+    $("healthCheckBtn").addEventListener("click", checkHealth);
+
+    $("runDetailedHealth").addEventListener("click", checkHealth);
+
+    // INCIDENTS
+
+    $("clearIncidentsBtn").addEventListener("click", () => {
+        const confirmed = confirm(
+            "Clear this browser session's incident log? This does not change backend logs."
+        );
+
+        if (!confirmed) return;
+
+        state.incidents = [];
+        state.openIncidents = 0;
+        state.confirmedRecoveries = 0;
+        state.lastHealthFailed = false;
+
+        renderIncidents();
+        updateCounters();
+
+        showToast("Dashboard session log cleared.");
+    });
+
+    // CHAOS LAB
+
+    $("chaosHealthBtn").addEventListener("click", async () => {
+        await checkHealth();
+
+        $("chaosOutput").textContent =
+            "Backend health check finished. See System Health for the measured result.";
+    });
+
+    $("chaosDatabaseBtn").addEventListener("click", runDatabaseCheck);
+
+    $("chaosRetryBtn").addEventListener("click", () => {
+        recordPlannedTest(
+            "Retry mechanism test planned",
+            "A real retry test needs backend retry logic and a controlled transient failure."
+        );
+    });
+
+    $("chaosTrafficBtn").addEventListener("click", () => {
+        recordPlannedTest(
+            "Traffic spike test planned",
+            "A real load test needs a controlled request generator and measured server responses."
+        );
+    });
+
+    $("chaosDataBtn").addEventListener("click", () => {
+        recordPlannedTest(
+            "Invalid record test planned",
+            "A real data self-repair test needs backend validation and a quarantine mechanism."
+        );
+    });
+
+    // INITIAL LOAD
+
+    async function initializeDashboard() {
+        await checkHealth();
+        await loadStudents();
+        renderIncidents();
+        updateCounters();
+    }
+
+    initializeDashboard();
+
+    // Periodic monitoring checks only the existing health endpoint.
+    // It does not restart the server or perform automatic recovery.
+    setInterval(checkHealth, 15000);
+</script>
+</body>
+</html>
