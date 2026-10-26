@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.database import initialize_database
+from app.database import initialize_database, get_connection
 from app.routes import results, admin, self_healing
 
 
@@ -26,7 +26,6 @@ app = FastAPI(
 )
 
 
-# Allow the frontend to communicate with the backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -39,23 +38,18 @@ app.add_middleware(
 )
 
 
-# Student Results Routes
 app.include_router(
     results.router,
     prefix="/api/results",
     tags=["Student Results"]
 )
 
-
-# Admin Routes
 app.include_router(
     admin.router,
     prefix="/api/admin",
     tags=["Admin"]
 )
 
-
-# Self-Healing Routes
 app.include_router(
     self_healing.router,
     prefix="/api/self-healing",
@@ -74,18 +68,23 @@ def home():
 
 @app.get("/api/health")
 def health():
-    database_status = getattr(
-        app.state,
-        "database_status",
-        "not checked"
-    )
+    try:
+        with get_connection() as connection:
+            connection.execute("SELECT 1").fetchone()
 
-    return {
-        "status": (
-            "healthy"
-            if database_status == "connected"
-            else "degraded"
-        ),
-        "database": "SQLite",
-        "database_status": database_status
-    }
+        app.state.database_status = "connected"
+
+        return {
+            "status": "healthy",
+            "database": "SQLite",
+            "database_status": "connected"
+        }
+
+    except Exception:
+        app.state.database_status = "disconnected"
+
+        return {
+            "status": "degraded",
+            "database": "SQLite",
+            "database_status": "disconnected"
+        }

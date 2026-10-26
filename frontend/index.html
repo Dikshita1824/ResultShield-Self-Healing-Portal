@@ -361,33 +361,76 @@
                             <span class="pill pill-warning">TEST ENVIRONMENT</span>
                         </div>
 
-                        <div class="chaos-grid">
-                            <article class="panel chaos-card">
-                                <div class="panel-icon">⌁</div>
-                                <span class="eyebrow">TEST 01</span>
-                                <h3>Backend health</h3>
-                                <p>Check whether the backend responds to a health request.</p>
-                                <button class="button button-outline chaos-action"
-                                        data-chaos="health" type="button">Test connection →</button>
-                            </article>
-                            <article class="panel chaos-card">
-                                <div class="panel-icon">⟳</div>
-                                <span class="eyebrow">TEST 02</span>
-                                <h3>Recovery readiness</h3>
-                                <p>Review the current health state before running recovery experiments.</p>
-                                <button class="button button-outline chaos-action"
-                                        data-chaos="recovery" type="button">Check readiness →</button>
-                            </article>
-                            <article class="panel chaos-card">
-                                <div class="panel-icon">⚠</div>
-                                <span class="eyebrow">TEST 03</span>
-                                <h3>Incident feed</h3>
-                                <p>Load recorded incidents to review known failure events.</p>
-                                <button class="button button-outline chaos-action"
-                                        data-chaos="incidents" type="button">Load incidents →</button>
-                            </article>
-                        </div>
-                        <div id="chaosMessage" class="message hidden" role="status"></div>
+                       
+<div class="chaos-lab-heading">
+    <span class="chaos-eyebrow">RESILIENCE TESTING</span>
+    <h2>Failure Simulation Lab</h2>
+    <p>Test system failure scenarios and inspect recovery checks.</p>
+</div>
+
+<div id="chaosMessage" class="message" role="status" aria-live="polite">
+    Select a failure scenario to begin.
+</div>
+
+<div class="chaos-grid">
+
+    <article class="panel chaos-card">
+        <div class="panel-icon">01</div>
+        <span class="eyebrow">PROCESS FAILURE</span>
+        <h3>Backend Crash</h3>
+        <p>Check backend availability and the current recovery limitations.</p>
+        <button class="button button-outline chaos-action"
+                data-chaos="backend" type="button">
+            Run Backend Test →
+        </button>
+    </article>
+
+    <article class="panel chaos-card">
+        <div class="panel-icon">02</div>
+        <span class="eyebrow">DATABASE FAILURE</span>
+        <h3>Database Connection</h3>
+        <p>Test database connectivity and available recovery checks.</p>
+        <button class="button button-outline chaos-action"
+                data-chaos="database" type="button">
+            Run Database Test →
+        </button>
+    </article>
+
+    <article class="panel chaos-card">
+        <div class="panel-icon">03</div>
+        <span class="eyebrow">DATA INTEGRITY</span>
+        <h3>Invalid Student Record</h3>
+        <p>Inspect how invalid-record scenarios are reported and handled.</p>
+        <button class="button button-outline chaos-action"
+                data-chaos="invalid-record" type="button">
+            Run Validation Test →
+        </button>
+    </article>
+
+    <article class="panel chaos-card">
+        <div class="panel-icon">04</div>
+        <span class="eyebrow">TRAFFIC FAILURE</span>
+        <h3>Traffic Spike</h3>
+        <p>Inspect overload handling and the current rate-limiting limitation.</p>
+        <button class="button button-outline chaos-action"
+                data-chaos="traffic" type="button">
+            Run Traffic Test →
+        </button>
+    </article>
+
+</div>
+
+<div class="chaos-recovery-panel">
+    <div>
+        <h3>Recovery Control</h3>
+        <p>Run recovery checks for the selected scenarios.</p>
+    </div>
+    <button class="button button-primary" id="healthRecoverButton"
+            type="button">
+        Recover System →
+    </button>
+</div>
+
                     </section>
                 </div>
             </div>
@@ -485,7 +528,7 @@
     </div>
 </footer>
 
-<script src="script.js" defer></script>
+
 </body>
 </html>
 
