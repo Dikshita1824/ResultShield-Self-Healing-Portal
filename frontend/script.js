@@ -265,46 +265,149 @@ function initAdminNavigation() {
 
 // ---------- STUDENT RESULT SEARCH ----------
 
-function renderResult(result) {
+
+function renderResult(response) {
     const output = $("#resultOutput");
     if (!output) return;
 
     output.replaceChildren();
 
+    const student = response.student || response;
+    const status = String(
+        student.result ?? student.status ?? "N/A"
+    ).toUpperCase();
+
+    const passed = status === "PASS";
+    const failed = status === "FAIL";
+
+    const card = document.createElement("section");
+    card.className = `academic-result-card ${passed ? "is-pass" : failed ? "is-fail" : ""}`;
+
+    const header = document.createElement("div");
+    header.className = "academic-result-header";
+
+    const heading = document.createElement("div");
+    heading.className = "academic-result-heading";
+
+    const eyebrow = document.createElement("span");
+    eyebrow.className = "result-eyebrow";
+    eyebrow.textContent = "EXAMINATION RECORD";
+
+    const title = document.createElement("h2");
+    title.textContent = "Academic Result";
+
+    const subtitle = document.createElement("p");
+    subtitle.textContent = "University Examination Result";
+
+    heading.append(eyebrow, title, subtitle);
+
+    const badge = document.createElement("span");
+    badge.className = `academic-result-badge ${
+        passed ? "pass" : failed ? "fail" : "unknown"
+    }`;
+    badge.textContent = passed ? "✓ PASS" : failed ? "✕ FAIL" : status;
+
+    header.append(heading, badge);
+
+    const message = document.createElement("div");
+    message.className = `result-message ${
+        passed ? "message-pass" : failed ? "message-fail" : "message-unknown"
+    }`;
+
+    const messageTitle = document.createElement("strong");
+    const messageText = document.createElement("p");
+
+    if (passed) {
+        messageTitle.textContent = "Congratulations!";
+        messageText.textContent =
+            "You have successfully passed this examination. Keep up the great work!";
+    } else if (failed) {
+        messageTitle.textContent = "Result Update";
+        messageText.textContent =
+            "You have not passed this examination. Review your marks and consult your institution about the next steps.";
+    } else {
+        messageTitle.textContent = "Result status unavailable";
+        messageText.textContent =
+            "Please contact your institution to confirm this result.";
+    }
+
+    message.append(messageTitle, messageText);
+
+    const detailsHeading = document.createElement("h3");
+    detailsHeading.className = "result-section-title";
+    detailsHeading.textContent = "Student Details";
+
+    const details = document.createElement("div");
+    details.className = "academic-result-grid";
+
     const fields = [
-        ["Student Name", result.student_name ?? result.name],
-        ["Roll Number", result.roll_number ?? result.roll],
-        ["Course", result.course],
-        ["Semester", result.semester],
-        ["Marks", result.marks],
-        ["Maximum Marks", result.max_marks ?? result.total_marks],
-        ["Result", result.result ?? result.status]
+        ["Student Name", student.student_name ?? student.name ?? "N/A"],
+        ["Roll Number", student.roll_number ?? student.roll ?? "N/A"],
+        ["Course", student.course ?? "N/A"],
+        ["Semester", student.semester ?? "N/A"]
     ];
 
-    const wrapper = document.createElement("div");
-    wrapper.className = "result-details";
-
-    fields.forEach(([label, value]) => {
-        if (value === undefined || value === null || value === "") return;
-
+    fields.forEach(([label, value], index) => {
         const item = document.createElement("div");
-        item.className = "result-detail";
+        item.className = "academic-result-item";
 
-        const title = document.createElement("span");
-        title.className = "result-detail-label";
-        title.textContent = label;
+        const number = document.createElement("span");
+        number.className = "result-item-number";
+        number.textContent = `0${index + 1}`;
 
-        const content = document.createElement("strong");
-        content.className = "result-detail-value";
-        content.textContent = escapeText(value);
+        const contentBox = document.createElement("div");
+        contentBox.className = "result-item-content";
 
-        item.append(title, content);
-        wrapper.appendChild(item);
+        const caption = document.createElement("span");
+        caption.className = "academic-result-label";
+        caption.textContent = label;
+
+        const valueElement = document.createElement("strong");
+        valueElement.className = "academic-result-value";
+        valueElement.textContent = String(value);
+
+        contentBox.append(caption, valueElement);
+        item.append(number, contentBox);
+        details.appendChild(item);
     });
 
-    output.appendChild(wrapper);
+    const marksPanel = document.createElement("div");
+    marksPanel.className = "academic-result-marks";
+
+    const marksInfo = document.createElement("div");
+    marksInfo.className = "marks-info";
+
+    const marksLabel = document.createElement("span");
+    marksLabel.textContent = "MARKS OBTAINED";
+
+    const marksHint = document.createElement("span");
+    marksHint.textContent = "Final score";
+
+    marksInfo.append(marksLabel, marksHint);
+
+    const marksValue = document.createElement("div");
+    marksValue.className = "marks-value";
+
+    const obtained = document.createElement("strong");
+    obtained.textContent = String(student.marks ?? "N/A");
+
+    const separator = document.createElement("span");
+    separator.textContent = "/";
+
+    const maximum = document.createElement("span");
+    maximum.textContent = String(
+        student.max_marks ?? student.total_marks ?? 100
+    );
+
+    marksValue.append(obtained, separator, maximum);
+    marksPanel.append(marksInfo, marksValue);
+
+    card.append(header, message, detailsHeading, details, marksPanel);
+    output.appendChild(card);
+
     setHidden("#resultOutput", false);
 }
+
 
 function initResultSearch() {
     $("#resultForm")?.addEventListener("submit", async (event) => {
@@ -566,72 +669,93 @@ async function deleteStudent(student) {
     }
 }
 
-// ---------- INCIDENT CENTER ----------
+
+ // ---------- INCIDENT CENTER ----------
 
 function renderIncidents(data) {
-    const container = $("#incidentList");
-    if (!container) return;
-
-    container.replaceChildren();
-
     const incidents = Array.isArray(data)
         ? data
         : data.incidents || data.items || [];
 
     setText("#adminIncidentCount", String(incidents.length));
 
-    if (incidents.length === 0) {
-        container.textContent = "No incidents returned by the backend.";
-        return;
-    }
+    // Update every incident list, even if HTML contains duplicate IDs.
+    const containers = $$("#incidentList");
 
-    incidents.forEach((incident) => {
-        const card = document.createElement("div");
-        card.className = "incident-card";
+    containers.forEach((container) => {
+        container.replaceChildren();
 
-        const title = document.createElement("strong");
-        title.textContent = escapeText(
-            incident.title || incident.type || incident.name || "System incident"
-        );
+        if (incidents.length === 0) {
+            container.textContent = "No incidents returned by the backend.";
+            return;
+        }
 
-        const description = document.createElement("p");
-        description.textContent = escapeText(
-            incident.message ||
-            incident.description ||
-            incident.status ||
-            "No additional details."
-        );
+        incidents.forEach((incident) => {
+            const card = document.createElement("div");
+            card.className = "incident-card";
 
-        const meta = document.createElement("small");
-        meta.textContent = escapeText(
-            incident.timestamp || incident.created_at || incident.time || ""
-        );
+            const title = document.createElement("strong");
+            title.textContent = escapeText(
+                incident.title || incident.type || incident.name || "System incident"
+            );
 
-        card.append(title, description, meta);
-        container.appendChild(card);
+            const description = document.createElement("p");
+            description.textContent = escapeText(
+                incident.message || incident.description || incident.status ||
+                "No additional details."
+            );
+
+            const meta = document.createElement("small");
+            meta.textContent = escapeText(
+                incident.timestamp || incident.created_at || incident.time || ""
+            );
+
+            card.append(title, description, meta);
+            container.appendChild(card);
+        });
     });
 }
 
 async function loadIncidents() {
-    if (!adminToken) return;
+    if (!adminToken) {
+        openLoginModal();
+        return;
+    }
 
-    const container = $("#incidentList");
-    if (container) container.textContent = "Loading incidents…";
+    $$("#incidentList").forEach((container) => {
+        container.textContent = "Loading incidents...";
+    });
 
     try {
         const data = await apiRequest("/api/self-healing/incidents");
         renderIncidents(data);
     } catch (error) {
-        if (container) {
-            container.textContent =
-                `Could not load incidents: ${error.message}. Check the incidents API route.`;
-        }
+        $$("#incidentList").forEach((container) => {
+            container.textContent = `Could not load incidents: ${error.message}`;
+        });
     }
 }
 
+
 function initIncidentButtons() {
-    $("#refreshIncidents")?.addEventListener("click", loadIncidents);
+    document.addEventListener("click", async (event) => {
+        const button = event.target.closest("#refreshIncidents");
+
+        if (!button || button.disabled) return;
+
+        button.disabled = true;
+        const originalText = button.textContent;
+        button.textContent = "Refreshing...";
+
+        try {
+            await loadIncidents();
+        } finally {
+            button.disabled = false;
+            button.textContent = originalText.trim() || "Refresh incidents";
+        }
+    });
 }
+
 
 // ---------- CHAOS LAB ----------
 
@@ -745,43 +869,40 @@ document.addEventListener("DOMContentLoaded", () => {
     refreshHealth();
 });
 
-// ResultShield recovery button
-document
-    .getElementById("recoverSystemButton")
-    ?.addEventListener("click", async function () {
-        const button = this;
 
-        button.disabled = true;
-        button.textContent = "Checking system...";
+async function handleRecovery(button) {
+    if (!adminToken) {
+        openLoginModal();
+        return;
+    }
 
-        try {
-            if (!adminToken) {
-                openLoginModal();
-                return;
-            }
+    button.disabled = true;
+    button.textContent = "Recovering...";
 
-            const health = await apiRequest("/api/health");
+    try {
+        const result = await apiRequest(
+            "/api/self-healing/recover",
+            { method: "POST" }
+        );
 
-            if (health.status === "healthy") {
-                alert(
-                    "System is healthy. No recovery is required."
-                );
-                return;
-            }
+        alert(result.message || "Recovery check completed.");
 
-            const result = await apiRequest(
-                "/api/self-healing/recover",
-                { method: "POST" }
-            );
+        await refreshHealth();
+        await loadIncidents();
+    } catch (error) {
+        alert("Recovery failed: " + error.message);
+    } finally {
+        button.disabled = false;
+        button.textContent = "Recover System →";
+    }
+}
 
-            alert(result.message || "Recovery check completed.");
+document.getElementById("recoverSystemButton")
+    ?.addEventListener("click", function () {
+        handleRecovery(this);
+    });
 
-            await refreshHealth();
-            await loadIncidents();
-        } catch (error) {
-            alert("Recovery failed: " + error.message);
-        } finally {
-            button.disabled = false;
-            button.textContent = "Recover System →";
-        }
+document.getElementById("healthRecoverButton")
+    ?.addEventListener("click", function () {
+        handleRecovery(this);
     });
