@@ -1,374 +1,493 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>ResultShield | Self-Healing Result Portal</title>
-
+    <meta name="theme-color" content="#0b141c">
+    <title>ResultShield | University Portal</title>
     <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
 </head>
+
 <body>
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
 
-    <aside class="sidebar">
-        <div class="brand">
-            <div class="brand-icon">R</div>
-            <div>
-                <h2>ResultShield</h2>
-                <p>SELF-HEALING SYSTEM</p>
-            </div>
-        </div>
+    <header class="topbar">
+        <a href="#" class="brand" id="homeLink">
+            <span class="brand-icon">R<span>+</span></span>
+            <span class="brand-copy">
+                <strong>ResultShield</strong>
+                <small>UNIVERSITY SYSTEM</small>
+            </span>
+        </a>
 
-        <p class="menu-heading">WORKSPACE</p>
-
-        <nav>
-            <a href="#dashboard" class="nav-link active">◈ Dashboard</a>
-            <a href="#student" class="nav-link">▤ Student Results</a>
-            <a href="#healing" class="nav-link">✳ Self-Healing</a>
-            <a href="#chaos" class="nav-link">⚡ Chaos Lab</a>
-            <a href="#incidents" class="nav-link">▦ Incident History</a>
-        </nav>
-
-        <div class="sidebar-bottom">
-            <div class="system-indicator">
+        <div class="topbar-actions">
+            <span class="system-status">
                 <span class="status-dot"></span>
-                <div>
-                    <strong>System Monitor</strong>
-                    <p id="sidebarStatus">Checking system...</p>
-                </div>
-            </div>
-            <p class="copyright">Identity 2026 · Third Year</p>
+                <span id="connectionLabel">Checking system</span>
+            </span>
+
+            <button class="icon-button" id="themeToggle"
+                    type="button" aria-label="Toggle theme" title="Toggle theme">
+                ☼
+            </button>
+
+            <button class="button button-outline" id="adminLoginButton"
+        type="button" onclick="openLoginModal()">
+    Admin Login <span>↗</span>
+</button>
+            <button class="button button-outline hidden" id="adminLogoutButton"
+                    type="button">Sign out ↗</button>
         </div>
-    </aside>
+    </header>
 
-    <main class="main-content">
+    <main>
+        <!-- STUDENT PORTAL: DEFAULT LANDING PAGE -->
+        <section id="studentPortal" class="page-section">
+            <div class="hero">
+                <div class="hero-content">
+                    <div class="eyebrow">
+                        <span class="eyebrow-line"></span>
+                        SMART ACADEMIC INFRASTRUCTURE
+                    </div>
 
-        <header class="topbar">
-            <div>
-                <p class="eyebrow">IDENTITY 2026 / THIRD YEAR</p>
-                <h1>System Overview</h1>
-                <p class="subtitle">
-                    Intelligent monitoring. Automatic recovery. Reliable results.
-                </p>
+                    <h1>Your results.<br>
+                        <span class="gradient-text">Your future.</span>
+                    </h1>
+
+                    <p class="hero-description">
+                        Access your academic performance through a secure,
+                        reliable and intelligent university result portal.
+                    </p>
+
+                    <div class="hero-points">
+                        <span>✦ Secure access</span>
+                        <span>✦ Live system status</span>
+                        <span>✦ Reliable results</span>
+                    </div>
+                </div>
+
+                <div class="hero-visual" aria-hidden="true">
+                    <div class="orbit orbit-one"></div>
+                    <div class="orbit orbit-two"></div>
+                    <div class="shield-graphic">
+                        <div class="shield-inner">
+                            <span class="shield-check">✓</span>
+                            <small>VERIFIED</small>
+                        </div>
+                    </div>
+                    <div class="floating-card floating-card-top">
+                        <span class="mini-icon">↗</span>
+                        <span><strong>Secure access</strong><small>Protected results</small></span>
+                    </div>
+                    <div class="floating-card floating-card-bottom">
+                        <span class="mini-icon green-icon">✓</span>
+                        <span><strong>System online</strong><small>Monitoring active</small></span>
+                    </div>
+                </div>
             </div>
 
-            <div class="topbar-right">
-                <span class="environment-badge">● LOCAL ENVIRONMENT</span>
-                <button class="refresh-button" id="refreshButton">
-                    ↻ Refresh
-                </button>
-            </div>
-        </header>
-
-        <section class="hero" id="dashboard">
-            <div class="hero-content">
-                <span class="hero-label">AUTONOMOUS RELIABILITY PLATFORM</span>
-
-                <h2>Your results.<br><span>Always protected.</span></h2>
-
-                <p>
-                    ResultShield monitors system health and helps detect
-                    service failures before they interrupt the student experience.
-                </p>
-
-                <div class="hero-actions">
-                    <a href="#student" class="primary-button">
-                        Check a Result →
-                    </a>
-                    <a href="#healing" class="secondary-button">
-                        View System Health
-                    </a>
-                </div>
-            </div>
-
-            <div class="hero-visual">
-                <div class="shield-ring">
-                    <div class="shield-core">
-                        <span class="shield-symbol">✓</span>
-                    </div>
-                </div>
-                <p>RESILIENCE MONITOR</p>
-                <h3 id="heroHealth">Checking...</h3>
-                <span class="visual-caption">Backend health verification</span>
-            </div>
-        </section>
-
-        <section class="stats-grid">
-            <article class="stat-card">
-                <div class="stat-top">
-                    <span class="stat-icon cyan">◈</span>
-                    <span class="stat-caption">DATABASE</span>
-                </div>
-                <h2 id="databaseStatus">Checking</h2>
-                <p>Database connection</p>
-            </article>
-
-            <article class="stat-card">
-                <div class="stat-top">
-                    <span class="stat-icon purple">▤</span>
-                    <span class="stat-caption">STUDENTS</span>
-                </div>
-                <h2 id="studentCount">—</h2>
-                <p>Available sample records</p>
-            </article>
-
-            <article class="stat-card">
-                <div class="stat-top">
-                    <span class="stat-icon green">✳</span>
-                    <span class="stat-caption">RECOVERY</span>
-                </div>
-                <h2 id="recoveryStatus">Standby</h2>
-                <p>Self-healing controller</p>
-            </article>
-
-            <article class="stat-card">
-                <div class="stat-top">
-                    <span class="stat-icon orange">⚠</span>
-                    <span class="stat-caption">INCIDENTS</span>
-                </div>
-                <h2 id="incidentCount">—</h2>
-                <p>Recorded system incidents</p>
-            </article>
-        </section>
-
-        <section class="content-grid">
-
-            <article class="panel student-panel" id="student">
-                <div class="panel-heading">
-                    <div>
-                        <p class="eyebrow">STUDENT SERVICES</p>
-                        <h2>Examination Results</h2>
-                    </div>
-                    <span class="panel-icon">▤</span>
-                </div>
-
-                <p class="panel-description">
-                    Enter your roll number to retrieve your examination result.
-                </p>
-
-                <form id="resultForm">
-                    <label for="rollNumber">STUDENT ROLL NUMBER</label>
-
-                    <div class="search-row">
-                        <input
-                            type="text"
-                            id="rollNumber"
-                            placeholder="e.g. 101"
-                            required
-                        >
-                        <button type="submit" id="searchButton">
-                            Search →
-                        </button>
-                    </div>
-                </form>
-
-                <div id="resultMessage" class="message" aria-live="polite">
-                    Try a sample roll number: 101, 102 or 103.
-                </div>
-
-                <div id="resultCard" class="result-card hidden">
-                    <div class="result-card-header">
-                        <div>
-                            <p class="eyebrow">STUDENT RECORD</p>
-                            <h3 id="resultName">—</h3>
-                        </div>
-                        <span id="resultBadge" class="result-badge">—</span>
-                    </div>
-
-                    <div class="result-details">
-                        <div>
-                            <span>Roll Number</span>
-                            <strong id="resultRoll">—</strong>
-                        </div>
-                        <div>
-                            <span>Course</span>
-                            <strong id="resultCourse">—</strong>
-                        </div>
-                        <div>
-                            <span>Semester</span>
-                            <strong id="resultSemester">—</strong>
-                        </div>
-                        <div>
-                            <span>Marks</span>
-                            <strong id="resultMarks">—</strong>
-                        </div>
-                    </div>
-
-                    <div class="marks-track">
-                        <div id="marksProgress"></div>
-                    </div>
-                    <p id="marksPercentage" class="percentage-label">—</p>
-                </div>
-            </article>
-
-            <article class="panel health-panel" id="healing">
-                <div class="panel-heading">
-                    <div>
-                        <p class="eyebrow">AUTOMATED MONITORING</p>
-                        <h2>System Health</h2>
-                    </div>
-                    <span class="panel-icon">✳</span>
-                </div>
-
-                <div class="health-banner">
-                    <span class="health-pulse"></span>
-                    <div>
-                        <h3 id="healthStatus">Checking services</h3>
-                        <p id="healthDescription">
-                            Contacting the backend health endpoint.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="service-row">
-                    <div>
-                        <span class="service-dot"></span>
-                        <span>FastAPI Backend</span>
-                    </div>
-                    <strong id="backendService">Checking</strong>
-                </div>
-
-                <div class="service-row">
-                    <div>
-                        <span class="service-dot"></span>
-                        <span>Database</span>
-                    </div>
-                    <strong id="databaseService">Checking</strong>
-                </div>
-
-                <div class="service-row">
-                    <div>
-                        <span class="service-dot"></span>
-                        <span>Health Monitor</span>
-                    </div>
-                    <strong id="monitorService">Active</strong>
-                </div>
-
-                <button class="outline-button full-width" id="healthButton">
-                    Run Health Check ↻
-                </button>
-
-                <p class="small-note">
-                    Health information is fetched from the running backend.
-                </p>
-            </article>
-
-        </section>
-
-        <section class="panel chaos-panel" id="chaos">
-            <div class="panel-heading">
+            <div class="section-heading">
                 <div>
-                    <p class="eyebrow">RESILIENCE TESTING</p>
-                    <h2>Chaos Lab</h2>
-                    <p class="panel-description">
-                        Explore simulated failure scenarios and recovery strategies.
-                    </p>
+                    <div class="eyebrow">STUDENT SERVICES</div>
+                    <h2>Find your results</h2>
+                    <p>Enter your university roll number to view your result.</p>
                 </div>
-                <span class="panel-icon">⚡</span>
+                <span class="section-number">01 / PORTAL</span>
             </div>
 
-            <div class="chaos-grid">
-                <article class="chaos-card">
-                    <span class="chaos-number">01</span>
-                    <h3>Backend Failure</h3>
-                    <p>
-                        Explore how a health monitor can detect an unavailable
-                        backend and initiate a recovery workflow.
-                    </p>
-                    <span class="scenario-tag">SERVICE RECOVERY</span>
-                </article>
+            <div class="portal-grid">
+                <section class="panel result-panel">
+                    <div class="panel-heading">
+                        <div class="panel-icon">▤</div>
+                        <div>
+                            <h3>Academic result</h3>
+                            <p>Student result lookup</p>
+                        </div>
+                        <span class="pill">STUDENT</span>
+                    </div>
 
-                <article class="chaos-card">
-                    <span class="chaos-number">02</span>
-                    <h3>Database Failure</h3>
-                    <p>
-                        Explore retry strategies and connection recovery when
-                        the database becomes unavailable.
-                    </p>
-                    <span class="scenario-tag">CONNECTION RESILIENCE</span>
-                </article>
+                    <form id="resultForm">
+                        <label for="rollNumber">University roll number</label>
+                        <div class="input-row">
+                            <input id="rollNumber" name="rollNumber"
+                                   type="text" placeholder="e.g. 101"
+                                   autocomplete="off" required>
+                            <button class="button button-primary"
+                                    type="submit">Find result <span>→</span></button>
+                        </div>
+                        <p class="field-hint">Enter the roll number provided by your institution.</p>
+                    </form>
 
-                <article class="chaos-card">
-                    <span class="chaos-number">03</span>
-                    <h3>Traffic Spike</h3>
-                    <p>
-                        Explore how rate limiting and request queues can
-                        protect services during heavy traffic.
-                    </p>
-                    <span class="scenario-tag">LOAD PROTECTION</span>
-                </article>
+                    <div id="resultMessage" class="message hidden" role="status"></div>
+                    <div id="resultOutput" class="result-output hidden"></div>
+                </section>
 
-                <article class="chaos-card">
-                    <span class="chaos-number">04</span>
-                    <h3>Invalid Record</h3>
+                <aside class="panel info-panel">
+                    <div class="panel-icon">✦</div>
+                    <div class="eyebrow">BUILT FOR RELIABILITY</div>
+                    <h3>Results you can access with confidence.</h3>
                     <p>
-                        Explore record validation and quarantine before
-                        accepting incorrect student data.
+                        ResultShield monitors the portal and helps the system
+                        recover from common service interruptions.
                     </p>
-                    <span class="scenario-tag">DATA INTEGRITY</span>
-                </article>
+                    <div class="info-divider"></div>
+                    <div class="info-row">
+                        <span class="status-dot"></span>
+                        <span>Service health</span>
+                        <strong id="healthLabel">Checking…</strong>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-symbol">⌁</span>
+                        <span>System protection</span>
+                        <strong>Enabled</strong>
+                    </div>
+                </aside>
             </div>
 
-            <div class="chaos-notice">
-                <span>ⓘ</span>
-                <p>
-                    These cards currently describe the test scenarios.
-                    They do not inject failures or perform automatic recovery.
-                </p>
+            <div class="trust-strip">
+                <span>DESIGNED FOR MODERN ACADEMICS</span>
+                <span class="trust-line"></span>
+                <span>MONITOR <b>·</b> DETECT <b>·</b> RECOVER</span>
             </div>
         </section>
 
-        <section class="panel incidents-panel" id="incidents">
-            <div class="panel-heading">
+        <!-- ADMIN WORKSPACE: HIDDEN UNTIL ADMIN LOGIN -->
+        <section id="adminWorkspace" class="page-section hidden">
+            <div class="admin-heading">
                 <div>
-                    <p class="eyebrow">SYSTEM OBSERVABILITY</p>
-                    <h2>Recent Incidents</h2>
+                    <div class="eyebrow">CONTROL CENTER / ADMINISTRATOR</div>
+                    <h1>System <span class="gradient-text">overview.</span></h1>
+                    <p>Monitor portal health, manage records and investigate incidents.</p>
                 </div>
-
-                <button class="text-button" id="incidentRefresh">
-                    Refresh history ↻
-                </button>
+                <span class="pill"><span class="status-dot"></span> ADMIN WORKSPACE</span>
             </div>
 
-            <div id="incidentMessage" class="message">
-                Loading incident history...
-            </div>
+            <div class="admin-layout">
+                <aside class="admin-sidebar panel">
+                    <div class="sidebar-label">WORKSPACE</div>
 
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>INCIDENT</th>
-                            <th>DESCRIPTION</th>
-                            <th>TIME</th>
-                            <th>STATUS</th>
-                        </tr>
-                    </thead>
-                    <tbody id="incidentTable">
-                        <tr>
-                            <td colspan="4" class="empty-state">
-                                Loading incidents...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                    <button class="nav-item active" data-view="overview" type="button">
+                        <span>◫</span> Overview
+                    </button>
+                    <button class="nav-item" data-view="students" type="button">
+                        <span>♙</span> Student records
+                    </button>
+                    <button class="nav-item" data-view="health" type="button">
+                        <span>⌁</span> Self-Healing Center
+                    </button>
+                    <button class="nav-item" data-view="incidents" type="button">
+                        <span>◷</span> Incident Center
+                    </button>
+                    <button class="nav-item" data-view="chaos" type="button">
+                        <span>⚡</span> Chaos Lab
+                    </button>
+
+                    <div class="sidebar-footer">
+                        <span class="status-dot"></span>
+                        <span><strong>ResultShield</strong><small>System monitoring</small></span>
+                    </div>
+                </aside>
+
+                <div class="admin-content">
+                    <!-- OVERVIEW -->
+                    <section class="admin-view" id="view-overview">
+                        <div class="view-heading">
+                            <div>
+                                <h2>System overview</h2>
+                                <p>Current portal status at a glance.</p>
+                            </div>
+                            <button class="button button-outline" id="refreshHealth"
+                                    type="button">↻ Refresh status</button>
+                        </div>
+
+                        <div class="stats-grid">
+                            <article class="panel stat-card">
+                                <span class="stat-label">BACKEND STATUS</span>
+                                <strong id="adminHealth">Checking…</strong>
+                                <small>API health check</small>
+                            </article>
+                            <article class="panel stat-card">
+                                <span class="stat-label">DATABASE</span>
+                                <strong id="adminDatabase">Checking…</strong>
+                                <small>Connection status</small>
+                            </article>
+                            <article class="panel stat-card">
+                                <span class="stat-label">INCIDENT CENTER</span>
+                                <strong id="adminIncidentCount">—</strong>
+                                <small>Reported incidents</small>
+                            </article>
+                        </div>
+
+                        <div class="panel overview-note">
+                            <div class="panel-icon">✧</div>
+                            <div>
+                                <h3>Self-healing monitoring</h3>
+                                <p>
+                                    Use the workspace navigation to inspect system health,
+                                    view incidents and access available recovery tests.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- STUDENT MANAGEMENT -->
+                    <section class="admin-view hidden" id="view-students">
+                        <div class="view-heading">
+                            <div>
+                                <h2>Student records</h2>
+                                <p>Add, edit or delete academic records.</p>
+                            </div>
+                        </div>
+
+                        <div class="panel">
+                            <h3 id="studentFormTitle">Add student</h3>
+
+                            <form id="studentAdminForm" class="student-form">
+                                <input type="hidden" id="editStudentId">
+
+                                <div class="form-grid">
+                                    <div>
+                                        <label for="studentRoll">Roll number</label>
+                                        <input id="studentRoll" required placeholder="e.g. 104">
+                                    </div>
+                                    <div>
+                                        <label for="studentName">Full name</label>
+                                        <input id="studentName" required placeholder="Student name">
+                                    </div>
+                                    <div>
+                                        <label for="studentCourse">Course</label>
+                                        <input id="studentCourse" required placeholder="e.g. BCA">
+                                    </div>
+                                    <div>
+                                        <label for="studentSemester">Semester</label>
+                                        <input id="studentSemester" type="number"
+                                               min="1" max="12" required placeholder="e.g. 5">
+                                    </div>
+                                    <div>
+                                        <label for="studentMarks">Marks</label>
+                                        <input id="studentMarks" type="number"
+                                               min="0" max="100" required placeholder="0–100">
+                                    </div>
+                                </div>
+
+                                <div class="form-actions">
+                                    <button class="button button-primary" type="submit">
+                                        Save student →
+                                    </button>
+                                    <button class="button button-outline hidden"
+                                            id="cancelEdit" type="button">Cancel edit</button>
+                                </div>
+                            </form>
+                            <div id="adminStudentMessage" class="message hidden" role="status"></div>
+                        </div>
+
+                        <div class="panel records-panel">
+                            <div class="view-heading">
+                                <div>
+                                    <h3>Manage records</h3>
+                                    <p>Only use this area after backend admin authorization is enabled.</p>
+                                </div>
+                            </div>
+                            <div id="studentRecords" class="records-list">
+                                <p class="muted">Student list will load when the records API is connected.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- SELF-HEALING -->
+                    <section class="admin-view hidden" id="view-health">
+                        <div class="view-heading">
+                            <div>
+                                <h2>Self-Healing Center</h2>
+                                <p>Inspect the backend and database health checks.</p>
+                            </div>
+                            <button class="button button-primary" id="healthCheckButton"
+        type="button">Run health check →</button>
+
+<button class="button button-primary" id="recoverSystemButton"
+        type="button">Recover System →</button>
+                        </div>  
+                        <div class="panel">
+                            <div class="health-row">
+                                <span class="health-orb"></span>
+                                <div>
+                                    <h3>Backend API</h3>
+                                    <p id="healthDetails">Waiting for health check…</p>
+                                </div>
+                                <strong id="healthStatusValue">UNKNOWN</strong>
+                            </div>
+                            <div class="health-row">
+                                <span class="health-orb"></span>
+                                <div>
+                                    <h3>Database connection</h3>
+                                    <p id="databaseDetails">Waiting for health check…</p>
+                                </div>
+                                <strong id="databaseStatusValue">UNKNOWN</strong>
+                            </div>
+                            <p class="field-hint">
+                                This page displays real health-check results; it does not
+                                claim that automatic recovery has occurred unless the backend confirms it.
+                            </p>
+                        </div>
+                    </section>
+
+                    <!-- INCIDENT CENTER -->
+                    <section class="admin-view hidden" id="view-incidents">
+                        <div class="view-heading">
+                            <div>
+                                <h2>Incident Center</h2>
+                                <p>Review incidents returned by the backend.</p>
+                            </div>
+                            <button class="button button-outline" id="refreshIncidents"
+                                    type="button">↻ Refresh incidents</button>
+                        </div>
+                        <div class="panel">
+                            <div id="incidentList">
+                                <p class="muted">Incident records will appear here when the API is connected.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- CHAOS LAB -->
+                    <section class="admin-view hidden" id="view-chaos">
+                        <div class="view-heading">
+                            <div>
+                                <h2>Chaos Lab</h2>
+                                <p>Controlled experiments for testing system resilience.</p>
+                            </div>
+                            <span class="pill pill-warning">TEST ENVIRONMENT</span>
+                        </div>
+
+                        <div class="chaos-grid">
+                            <article class="panel chaos-card">
+                                <div class="panel-icon">⌁</div>
+                                <span class="eyebrow">TEST 01</span>
+                                <h3>Backend health</h3>
+                                <p>Check whether the backend responds to a health request.</p>
+                                <button class="button button-outline chaos-action"
+                                        data-chaos="health" type="button">Test connection →</button>
+                            </article>
+                            <article class="panel chaos-card">
+                                <div class="panel-icon">⟳</div>
+                                <span class="eyebrow">TEST 02</span>
+                                <h3>Recovery readiness</h3>
+                                <p>Review the current health state before running recovery experiments.</p>
+                                <button class="button button-outline chaos-action"
+                                        data-chaos="recovery" type="button">Check readiness →</button>
+                            </article>
+                            <article class="panel chaos-card">
+                                <div class="panel-icon">⚠</div>
+                                <span class="eyebrow">TEST 03</span>
+                                <h3>Incident feed</h3>
+                                <p>Load recorded incidents to review known failure events.</p>
+                                <button class="button button-outline chaos-action"
+                                        data-chaos="incidents" type="button">Load incidents →</button>
+                            </article>
+                        </div>
+                        <div id="chaosMessage" class="message hidden" role="status"></div>
+                    </section>
+                </div>
             </div>
         </section>
-
-        <footer class="footer">
-            <div class="brand footer-brand">
-                <div class="brand-icon">R</div>
-                <div>
-                    <h2>ResultShield</h2>
-                    <p>RELIABILITY BY DESIGN</p>
-                </div>
-            </div>
-
-            <p>Identity 2026 · Third Year — Self-Healing Software</p>
-        </footer>
-
     </main>
 
-    <script src="script.js"></script>
+    <!-- ADMIN LOGIN MODAL -->
+    <div id="loginModal" class="modal hidden" role="dialog"
+         aria-modal="true" aria-labelledby="loginTitle">
+        <div class="modal-backdrop" id="modalBackdrop"></div>
+        <div class="modal-card">
+            <button class="modal-close" id="closeLogin" type="button"
+                    aria-label="Close login">×</button>
+
+            <div class="brand-icon modal-brand">R<span>+</span></div>
+            <div class="eyebrow">RESTRICTED ACCESS</div>
+            <h2 id="loginTitle">Admin sign in</h2>
+            <p>Sign in to access system management and self-healing tools.</p>
+
+            <form id="adminLoginForm">
+                <label for="adminUsername">Username</label>
+                <input id="adminUsername" autocomplete="username"
+                       required placeholder="Enter admin username">
+
+                <label for="adminPassword">Password</label>
+                <input id="adminPassword" type="password"
+                       autocomplete="current-password"
+                       required placeholder="Enter admin password">
+
+                <button class="button button-primary login-submit"
+                        type="submit">Sign in securely →</button>
+            </form>
+            <div id="loginMessage" class="message hidden" role="status"></div>
+            <p class="security-note">Admin access must be verified by the backend.</p>
+        </div>
+    </div>
+
+  
+<footer class="site-footer">
+    <div class="footer-glow-line"></div>
+
+    <div class="footer-main">
+        <div class="footer-brand-section">
+            <a href="#" class="footer-logo" id="footerHome">
+                <span class="footer-logo-icon">R<span>+</span></span>
+                <span>
+                    <strong>ResultShield</strong>
+                    <small>UNIVERSITY SYSTEM</small>
+                </span>
+            </a>
+
+            <p>
+                Smarter academic management.<br>
+                Reliable results. Self-healing infrastructure.
+            </p>
+
+            <div class="footer-status">
+                <span class="status-dot"></span>
+                <span id="footerStatus">System status checking…</span>
+            </div>
+        </div>
+
+        <div class="footer-links">
+            <h4>PORTAL</h4>
+            <a href="#" id="footerStudentLink">Student Portal</a>
+            <a href="#" id="footerAdminLink">Admin Login</a>
+        </div>
+
+        <div class="footer-links">
+            <h4>PLATFORM</h4>
+            <a href="#" id="footerHealthLink">System Health</a>
+            <a href="#" id="footerIncidentLink">Incident Center</a>
+            <a href="#" id="footerChaosLink">Chaos Lab</a>
+        </div>
+
+        <div class="footer-message">
+            <span class="footer-spark">✦</span>
+            <h4>Built for resilience.</h4>
+            <p>
+                Monitor. Detect. Recover.<br>
+                Keeping academic services dependable.
+            </p>
+            <span class="footer-version">
+                IDENTITY 2026 · SELF-HEALING SOFTWARE
+            </span>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <span>© 2026 ResultShield. Academic project.</span>
+        <span class="footer-bottom-right">
+            <span class="footer-mini-dot"></span>
+            DESIGNED FOR RELIABILITY
+        </span>
+    </div>
+</footer>
+
+<script src="script.js" defer></script>
+</body>
+</html>
+
 </body>
 </html>
