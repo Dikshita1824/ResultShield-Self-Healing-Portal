@@ -15,6 +15,8 @@ from app.database import (
 )
 
 router = APIRouter()
+
+# Tokens remain valid only while the backend process is running.
 active_tokens = set()
 
 
@@ -37,7 +39,10 @@ def validate_student_record(student):
     if not is_valid_student(student):
         raise HTTPException(
             status_code=422,
-            detail="Invalid student record. Check marks, name, course and semester."
+            detail=(
+                "Invalid student record. Check marks, name, "
+                "course and semester."
+            ),
         )
 
 
@@ -48,17 +53,18 @@ def admin_login(credentials: AdminLogin):
 
     valid_user = secrets.compare_digest(
         credentials.username,
-        expected_user
+        expected_user,
     )
+
     valid_password = secrets.compare_digest(
         credentials.password,
-        expected_password
+        expected_password,
     )
 
     if not (valid_user and valid_password):
         raise HTTPException(
             status_code=401,
-            detail="Invalid username or password"
+            detail="Invalid username or password",
         )
 
     token = secrets.token_urlsafe(32)
@@ -66,45 +72,62 @@ def admin_login(credentials: AdminLogin):
 
     return {
         "access_token": token,
-        "token_type": "bearer"
+        "token_type": "bearer",
     }
 
 
-def verify_admin(authorization: Optional[str] = None):
-    if not authorization or not authorization.startswith("Bearer "):
+def verify_admin(
+    authorization: Optional[str] = Header(default=None),
+):
+    if not authorization:
         raise HTTPException(
             status_code=401,
-            detail="Admin login required"
+            detail="Authorization header is missing. Please log in again.",
         )
 
-    token = authorization[7:]
+    scheme, separator, token = authorization.partition(" ")
+
+    if (
+        not separator
+        or scheme.lower() != "bearer"
+        or not token.strip()
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid authorization format. Use: Bearer <token>",
+        )
+
+    token = token.strip()
 
     if token not in active_tokens:
         raise HTTPException(
             status_code=401,
-            detail="Invalid or expired admin session"
+            detail="Invalid or expired admin session. Please log in again.",
         )
 
 
 @router.get("/students")
-def list_students(authorization: str = Header(default="")):
+def list_students(
+    authorization: Optional[str] = Header(default=None),
+):
     verify_admin(authorization)
 
     try:
         return fetch_students()
-    except Exception:
+    except Exception as exc:
         raise HTTPException(
             status_code=503,
-            detail="Unable to retrieve student records"
-        )
+            detail="Unable to retrieve student records",
+        ) from exc
 
 
 @router.post("/students", status_code=201)
 def add_student(
     record: StudentRecord,
-    authorization: str = Header(default="")
+    authorization: Optional[str] = Header(default=None),
 ):
     verify_admin(authorization)
+
     student = record.model_dump()
     student["roll_number"] = student["roll_number"].strip()
     student["name"] = student["name"].strip()
@@ -116,54 +139,58 @@ def add_student(
     if fetch_student(student["roll_number"]) is not None:
         raise HTTPException(
             status_code=409,
-            detail="A student with this roll number already exists"
+            detail="A student with this roll number already exists",
         )
 
     try:
         with get_connection() as connection:
-            connection.execute("""
+            connection.execute(
+                """
                 INSERT INTO students
-                    (roll_number, name, course, semester, marks, max_marks, result)
+                    (roll_number, name, course, semester, marks,
+                     max_marks, result)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
-            """, (
-                student["roll_number"],
-                student["name"],
-                student["course"],
-                student["semester"],
-                student["marks"],
-                student["max_marks"],
-                student["result"]
-            ))
+                """,
+                (
+                    student["roll_number"],
+                    student["name"],
+                    student["course"],
+                    student["semester"],
+                    student["marks"],
+                    student["max_marks"],
+                    student["result"],
+                ),
+            )
 
         save_student_backup(student)
 
         return {
             "success": True,
             "message": "Student added and backup saved",
-            "student": student
+            "student": student,
         }
 
     except HTTPException:
         raise
-    except Exception:
+    except Exception as exc:
         raise HTTPException(
             status_code=503,
-            detail="Unable to add student record"
-        )
+            detail="Unable to add student record",
+        ) from exc
 
 
 @router.put("/students/{roll_number}")
 def update_student(
     roll_number: str,
     record: StudentRecord,
-    authorization: str = Header(default="")
+    authorization: Optional[str] = Header(default=None),
 ):
     verify_admin(authorization)
 
     if roll_number != record.roll_number:
         raise HTTPException(
             status_code=400,
-            detail="URL roll number and record roll number must match"
+            detail="URL roll number and record roll number must match",
         )
 
     student = record.model_dump()
@@ -177,38 +204,42 @@ def update_student(
     if fetch_student(roll_number) is None:
         raise HTTPException(
             status_code=404,
-            detail="Student record not found"
+            detail="Student record not found",
         )
 
     try:
         with get_connection() as connection:
-            connection.execute("""
+            connection.execute(
+                """
                 UPDATE students
                 SET name = ?, course = ?, semester = ?,
                     marks = ?, max_marks = ?, result = ?
                 WHERE roll_number = ?
-            """, (
-                student["name"],
-                student["course"],
-                student["semester"],
-                student["marks"],
-                student["max_marks"],
-                student["result"],
-                roll_number
-            ))
+                """,
+                (
+                    student["name"],
+                    student["course"],
+                    student["semester"],
+                    student["marks"],
+                    student["max_marks"],
+                    student["result"],
+                    roll_number,
+                ),
+            )
 
         save_student_backup(student)
 
         return {
             "success": True,
             "message": "Student updated and backup refreshed",
-            "student": student
+            "student": student,
         }
 
     except HTTPException:
         raise
-    except Exception:
+    except Exception as exc:
         raise HTTPException(
             status_code=503,
-            detail="Unable to update student record"
-        )
+            detail="Unable to update student record",
+        ) from exc
+

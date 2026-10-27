@@ -12,12 +12,14 @@ const $$ = (selector) => document.querySelectorAll(selector);
 let adminToken = null;
 let currentView = "overview";
 let editingStudent = false;
+let selectedFailure = null;
+let chaosBusy = false;
 
 // ---------- SAFE HELPERS ----------
 
 function setText(selector, message) {
     const element = $(selector);
-    if (element) element.textContent = message
+    if (element) element.textContent = message;
 }
 
 function showMessage(selector, message, type = "") {
@@ -27,7 +29,6 @@ function showMessage(selector, message, type = "") {
     element.textContent = message;
     element.className = type ? `message ${type}` : "message";
 }
-
 
 function setHidden(selector, hidden) {
     const element = $(selector);
@@ -61,6 +62,7 @@ async function apiRequest(path, options = {}) {
     });
 
     const contentType = response.headers.get("content-type") || "";
+
     const data = contentType.includes("application/json")
         ? await response.json()
         : await response.text();
@@ -87,7 +89,6 @@ function initTheme() {
     }
 
     const toggle = $("#themeToggle");
-
     if (!toggle) return;
 
     updateThemeButton();
@@ -111,6 +112,7 @@ function updateThemeButton() {
     const isLight = document.body.classList.contains("light-theme");
 
     toggle.textContent = isLight ? "☾" : "☀";
+
     toggle.setAttribute(
         "aria-label",
         isLight ? "Switch to dark theme" : "Switch to light theme"
@@ -162,10 +164,15 @@ function closeLoginModal() {
 
 function logoutAdmin() {
     adminToken = null;
+
     showStudentPortal();
     updateLoginButtons();
-    setText("#adminUsername", "");
-    setText("#adminPassword", "");
+
+    const username = $("#adminUsername");
+    const password = $("#adminPassword");
+
+    if (username) username.value = "";
+    if (password) password.value = "";
 }
 
 // ---------- ADMIN LOGIN ----------
@@ -194,10 +201,6 @@ function initLogin() {
         setText("#loginMessage", "Verifying admin credentials…");
 
         try {
-            /*
-             * The backend must implement this endpoint and verify credentials.
-             * Expected response: { "access_token": "...", "token_type": "bearer" }
-             */
             const data = await apiRequest("/api/admin/login", {
                 method: "POST",
                 body: JSON.stringify({ username, password })
@@ -214,11 +217,13 @@ function initLogin() {
             closeLoginModal();
             updateLoginButtons();
             showAdminWorkspace();
+
         } catch (error) {
             setText(
                 "#loginMessage",
                 `Login unavailable: ${error.message}. Check the backend login endpoint.`
             );
+
         } finally {
             if (submitButton) submitButton.disabled = false;
         }
@@ -265,7 +270,6 @@ function initAdminNavigation() {
 
 // ---------- STUDENT RESULT SEARCH ----------
 
-
 function renderResult(response) {
     const output = $("#resultOutput");
     if (!output) return;
@@ -273,6 +277,7 @@ function renderResult(response) {
     output.replaceChildren();
 
     const student = response.student || response;
+
     const status = String(
         student.result ?? student.status ?? "N/A"
     ).toUpperCase();
@@ -281,7 +286,9 @@ function renderResult(response) {
     const failed = status === "FAIL";
 
     const card = document.createElement("section");
-    card.className = `academic-result-card ${passed ? "is-pass" : failed ? "is-fail" : ""}`;
+
+    card.className =
+        `academic-result-card ${passed ? "is-pass" : failed ? "is-fail" : ""}`;
 
     const header = document.createElement("div");
     header.className = "academic-result-header";
@@ -302,31 +309,37 @@ function renderResult(response) {
     heading.append(eyebrow, title, subtitle);
 
     const badge = document.createElement("span");
-    badge.className = `academic-result-badge ${
-        passed ? "pass" : failed ? "fail" : "unknown"
-    }`;
+
+    badge.className =
+        `academic-result-badge ${passed ? "pass" : failed ? "fail" : "unknown"}`;
+
     badge.textContent = passed ? "✓ PASS" : failed ? "✕ FAIL" : status;
 
     header.append(heading, badge);
 
     const message = document.createElement("div");
-    message.className = `result-message ${
-        passed ? "message-pass" : failed ? "message-fail" : "message-unknown"
-    }`;
+
+    message.className =
+        `result-message ${passed ? "message-pass" : failed ? "message-fail" : "message-unknown"}`;
 
     const messageTitle = document.createElement("strong");
     const messageText = document.createElement("p");
 
     if (passed) {
         messageTitle.textContent = "Congratulations!";
+
         messageText.textContent =
             "You have successfully passed this examination. Keep up the great work!";
+
     } else if (failed) {
         messageTitle.textContent = "Result Update";
+
         messageText.textContent =
             "You have not passed this examination. Review your marks and consult your institution about the next steps.";
+
     } else {
         messageTitle.textContent = "Result status unavailable";
+
         messageText.textContent =
             "Please contact your institution to confirm this result.";
     }
@@ -395,6 +408,7 @@ function renderResult(response) {
     separator.textContent = "/";
 
     const maximum = document.createElement("span");
+
     maximum.textContent = String(
         student.max_marks ?? student.total_marks ?? 100
     );
@@ -407,7 +421,6 @@ function renderResult(response) {
 
     setHidden("#resultOutput", false);
 }
-
 
 function initResultSearch() {
     $("#resultForm")?.addEventListener("submit", async (event) => {
@@ -430,8 +443,12 @@ function initResultSearch() {
 
             renderResult(result);
             setText("#resultMessage", "");
+
         } catch (error) {
-            setText("#resultMessage", `Unable to find result: ${error.message}`);
+            setText(
+                "#resultMessage",
+                `Unable to find result: ${error.message}`
+            );
         }
     });
 }
@@ -440,6 +457,7 @@ function initResultSearch() {
 
 function displayHealth(data) {
     const status = String(data.status || "unknown").toUpperCase();
+
     const dbStatus = String(
         data.database_status || data.database || "unknown"
     );
@@ -456,7 +474,9 @@ function displayHealth(data) {
         `Database: ${dbStatus}`
     ];
 
-    if (data.message) details.push(`Message: ${data.message}`);
+    if (data.message) {
+        details.push(`Message: ${data.message}`);
+    }
 
     setText("#healthDetails", details.join("\n"));
     setText("#databaseDetails", `Database status: ${dbStatus}`);
@@ -467,6 +487,7 @@ async function refreshHealth() {
     try {
         const data = await apiRequest("/api/health");
         displayHealth(data);
+
     } catch (error) {
         setText("#healthLabel", "UNAVAILABLE");
         setText("#adminHealth", "UNAVAILABLE");
@@ -504,11 +525,13 @@ function renderStudents(students) {
         details.className = "student-record-details";
 
         const name = document.createElement("strong");
+
         name.textContent = escapeText(
             student.student_name ?? student.name ?? "Unnamed student"
         );
 
         const info = document.createElement("p");
+
         info.textContent =
             `Roll: ${student.roll_number ?? student.roll ?? "—"} · ` +
             `Course: ${student.course ?? "—"} · ` +
@@ -523,12 +546,18 @@ function renderStudents(students) {
         const editButton = document.createElement("button");
         editButton.type = "button";
         editButton.textContent = "Edit";
-        editButton.addEventListener("click", () => beginEditStudent(student));
+
+        editButton.addEventListener("click", () => {
+            beginEditStudent(student);
+        });
 
         const deleteButton = document.createElement("button");
         deleteButton.type = "button";
         deleteButton.textContent = "Delete";
-        deleteButton.addEventListener("click", () => deleteStudent(student));
+
+        deleteButton.addEventListener("click", () => {
+            deleteStudent(student);
+        });
 
         actions.append(editButton, deleteButton);
         card.append(details, actions);
@@ -541,10 +570,14 @@ async function loadStudents() {
 
     try {
         const data = await apiRequest("/api/admin/students");
-        const students = Array.isArray(data) ? data : data.students;
+
+        const students = Array.isArray(data)
+            ? data
+            : data.students;
 
         renderStudents(students || []);
         setText("#adminStudentMessage", "");
+
     } catch (error) {
         setText(
             "#adminStudentMessage",
@@ -558,14 +591,22 @@ function beginEditStudent(student) {
 
     editingStudent = true;
 
-    $("#editStudentId").value = student.id ?? student.roll_number ?? student.roll ?? "";
-    $("#studentRoll").value = student.roll_number ?? student.roll ?? "";
-    $("#studentName").value = student.student_name ?? student.name ?? "";
+    $("#editStudentId").value =
+        student.id ?? student.roll_number ?? student.roll ?? "";
+
+    $("#studentRoll").value =
+        student.roll_number ?? student.roll ?? "";
+
+    $("#studentName").value =
+        student.student_name ?? student.name ?? "";
+
     $("#studentCourse").value = student.course ?? "";
     $("#studentSemester").value = student.semester ?? "";
     $("#studentMarks").value = student.marks ?? "";
 
-    const submit = $("#studentAdminForm")?.querySelector('[type="submit"]');
+    const submit = $("#studentAdminForm")
+        ?.querySelector('[type="submit"]');
+
     if (submit) submit.textContent = "Update Student";
 
     setText("#adminStudentMessage", "Editing student record.");
@@ -575,11 +616,15 @@ function beginEditStudent(student) {
 function resetStudentForm() {
     $("#studentAdminForm")?.reset();
 
-    if ($("#editStudentId")) $("#editStudentId").value = "";
+    if ($("#editStudentId")) {
+        $("#editStudentId").value = "";
+    }
 
     editingStudent = false;
 
-    const submit = $("#studentAdminForm")?.querySelector('[type="submit"]');
+    const submit = $("#studentAdminForm")
+        ?.querySelector('[type="submit"]');
+
     if (submit) submit.textContent = "Add Student";
 }
 
@@ -609,11 +654,15 @@ function initStudentManagement() {
             !Number.isFinite(student.semester) ||
             !Number.isFinite(student.marks)
         ) {
-            setText("#adminStudentMessage", "Please fill all student fields correctly.");
+            setText(
+                "#adminStudentMessage",
+                "Please fill all student fields correctly."
+            );
             return;
         }
 
         const id = $("#editStudentId")?.value;
+
         const url = editingStudent
             ? `/api/admin/students/${encodeURIComponent(id)}`
             : "/api/admin/students";
@@ -631,6 +680,7 @@ function initStudentManagement() {
 
             resetStudentForm();
             await loadStudents();
+
         } catch (error) {
             setText(
                 "#adminStudentMessage",
@@ -655,12 +705,14 @@ async function deleteStudent(student) {
     }
 
     try {
-        await apiRequest(`/api/admin/students/${encodeURIComponent(id)}`, {
-            method: "DELETE"
-        });
+        await apiRequest(
+            `/api/admin/students/${encodeURIComponent(id)}`,
+            { method: "DELETE" }
+        );
 
         setText("#adminStudentMessage", "Student deleted.");
         await loadStudents();
+
     } catch (error) {
         setText(
             "#adminStudentMessage",
@@ -669,8 +721,7 @@ async function deleteStudent(student) {
     }
 }
 
-
- // ---------- INCIDENT CENTER ----------
+// ---------- INCIDENT CENTER ----------
 
 function renderIncidents(data) {
     const incidents = Array.isArray(data)
@@ -679,14 +730,14 @@ function renderIncidents(data) {
 
     setText("#adminIncidentCount", String(incidents.length));
 
-    // Update every incident list, even if HTML contains duplicate IDs.
     const containers = $$("#incidentList");
 
     containers.forEach((container) => {
         container.replaceChildren();
 
         if (incidents.length === 0) {
-            container.textContent = "No incidents returned by the backend.";
+            container.textContent =
+                "No incidents returned by the backend.";
             return;
         }
 
@@ -695,19 +746,30 @@ function renderIncidents(data) {
             card.className = "incident-card";
 
             const title = document.createElement("strong");
+
             title.textContent = escapeText(
-                incident.title || incident.type || incident.name || "System incident"
+                incident.title ||
+                incident.type ||
+                incident.name ||
+                "System incident"
             );
 
             const description = document.createElement("p");
+
             description.textContent = escapeText(
-                incident.message || incident.description || incident.status ||
+                incident.message ||
+                incident.description ||
+                incident.status ||
                 "No additional details."
             );
 
             const meta = document.createElement("small");
+
             meta.textContent = escapeText(
-                incident.timestamp || incident.created_at || incident.time || ""
+                incident.timestamp ||
+                incident.created_at ||
+                incident.time ||
+                ""
             );
 
             card.append(title, description, meta);
@@ -729,13 +791,14 @@ async function loadIncidents() {
     try {
         const data = await apiRequest("/api/self-healing/incidents");
         renderIncidents(data);
+
     } catch (error) {
         $$("#incidentList").forEach((container) => {
-            container.textContent = `Could not load incidents: ${error.message}`;
+            container.textContent =
+                `Could not load incidents: ${error.message}`;
         });
     }
 }
-
 
 function initIncidentButtons() {
     document.addEventListener("click", async (event) => {
@@ -744,20 +807,91 @@ function initIncidentButtons() {
         if (!button || button.disabled) return;
 
         button.disabled = true;
+
         const originalText = button.textContent;
         button.textContent = "Refreshing...";
 
         try {
             await loadIncidents();
+
         } finally {
             button.disabled = false;
-            button.textContent = originalText.trim() || "Refresh incidents";
+            button.textContent =
+                originalText.trim() || "Refresh incidents";
         }
     });
 }
 
-
 // ---------- CHAOS LAB ----------
+
+function renderChaosStatus({
+    title,
+    status,
+    message,
+    diagnosis = "",
+    type = "failed",
+    evidence = null
+}) {
+    const container = $("#chaosMessage");
+    if (!container) return;
+
+    container.replaceChildren();
+
+    container.className = `message chaos-status chaos-status-${type}`;
+    container.setAttribute("role", "status");
+    container.setAttribute("aria-live", "polite");
+
+    const card = document.createElement("div");
+    card.className = "chaos-status-card";
+
+    const label = document.createElement("span");
+    label.className = "chaos-status-label";
+    label.textContent = status;
+
+    const heading = document.createElement("h3");
+    heading.textContent = title;
+
+    const description = document.createElement("p");
+    description.textContent = message;
+
+    card.append(label, heading, description);
+
+    if (diagnosis) {
+        const diagnosisHeading = document.createElement("strong");
+        diagnosisHeading.textContent = "Diagnosis";
+
+        const diagnosisText = document.createElement("p");
+        diagnosisText.textContent = diagnosis;
+
+        card.append(diagnosisHeading, diagnosisText);
+    }
+
+    if (evidence && typeof evidence === "object") {
+        const evidenceHeading = document.createElement("strong");
+        evidenceHeading.textContent = "Test Evidence";
+
+        const evidenceText = document.createElement("pre");
+        evidenceText.textContent = JSON.stringify(evidence, null, 2);
+
+        card.append(evidenceHeading, evidenceText);
+    }
+
+    container.appendChild(card);
+}
+
+function getFailureTitle(data, action) {
+    const titles = {
+        backend: "Backend Availability Failure",
+        database: "Database Connectivity Test",
+        "invalid-record": "Invalid Student Record",
+        traffic: "Traffic Spike Detected",
+        "backup-unavailable": "Verified Backup Unavailable"
+    };
+
+    return data.failure?.title ||
+        titles[action] ||
+        "System Failure Test";
+}
 
 async function runChaosAction(action) {
     if (!adminToken) {
@@ -765,36 +899,79 @@ async function runChaosAction(action) {
         return;
     }
 
-    const confirmation = window.confirm(
-        `Run the "${action}" test? Only use this on your local development system.`
+    if (chaosBusy) return;
+
+    const button = document.querySelector(
+        `.chaos-action[data-chaos="${action}"]`
     );
 
-    if (!confirmation) return;
+    if (!button) return;
 
-    setText("#chaosMessage", `Running ${action} test…`);
+    // Confirmation popup removed.
+    // The selected failure test starts immediately on click.
+
+    chaosBusy = true;
+    selectedFailure = action;
+    button.disabled = true;
+
+    const originalText = button.textContent;
+    button.textContent = "Running test...";
+
+    renderChaosStatus({
+        title: "Running Failure Test",
+        status: "TEST IN PROGRESS",
+        message:
+            "ResultShield is checking the selected failure scenario.",
+        type: "running"
+    });
 
     try {
-        /*
-         * This endpoint must be implemented and protected by the backend.
-         * Do not expose destructive chaos tests to unauthenticated users.
-         */
         const data = await apiRequest(
             `/api/self-healing/chaos/${encodeURIComponent(action)}`,
             { method: "POST" }
         );
 
-        setText(
-            "#chaosMessage",
-            data.message || `${action} test request completed.`
-        );
+        const detected = data.detected === true;
+
+        renderChaosStatus({
+            title: detected
+                ? `SYSTEM FAILURE DETECTED — ${getFailureTitle(data, action)}`
+                : getFailureTitle(data, action),
+
+            status: detected
+                ? "FAILURE DETECTED"
+                : String(data.status || "CHECK COMPLETED").toUpperCase(),
+
+            message: data.message ||
+                "The failure scenario test has completed.",
+
+            diagnosis: data.diagnosis ||
+                "Review the test result before attempting recovery.",
+
+            type: detected ? "failed" : "success",
+            evidence: data.evidence
+        });
 
         await refreshHealth();
-        await loadIncidents();
+
+        if (adminToken) {
+            await loadIncidents();
+        }
+
     } catch (error) {
-        setText(
-            "#chaosMessage",
-            `Test unavailable: ${error.message}. Check the protected chaos API route.`
-        );
+        renderChaosStatus({
+            title: "Failure Test Could Not Complete",
+            status: "TEST ERROR",
+            message: error.message,
+            diagnosis:
+                "Check that the backend is running and the admin session is valid.",
+            type: "error"
+        });
+
+    } finally {
+        chaosBusy = false;
+        button.disabled = false;
+        button.textContent = originalText;
     }
 }
 
@@ -803,6 +980,162 @@ function initChaosLab() {
         button.addEventListener("click", () => {
             runChaosAction(button.dataset.chaos);
         });
+    });
+}
+
+// ---------- RECOVERY CONTROL ----------
+
+async function handleRecovery(button) {
+    if (!adminToken) {
+        openLoginModal();
+        return;
+    }
+
+    if (chaosBusy) return;
+
+    chaosBusy = true;
+    button.disabled = true;
+
+    const originalText = button.textContent;
+    button.textContent = "Recovering...";
+
+    renderChaosStatus({
+        title: "Recovery In Progress",
+        status: "RECOVERY RUNNING",
+        message: selectedFailure
+            ? `Attempting recovery for: ${selectedFailure}`
+            : "Checking active incidents and attempting eligible recoveries.",
+        type: "running"
+    });
+
+    try {
+        const result = await apiRequest(
+            "/api/self-healing/recover",
+            { method: "POST" }
+        );
+
+        const failed = Array.isArray(result.failed)
+            ? result.failed
+            : [];
+
+        const recovered = Array.isArray(result.recovered)
+            ? result.recovered
+            : [];
+
+        const activeFailures = Array.isArray(result.active_failures)
+            ? result.active_failures
+            : [];
+
+        const backupFailure = failed.find((item) =>
+            item.failure === "backup-unavailable"
+        );
+
+        const recoveryFailed =
+            failed.length > 0 ||
+            String(result.status || "").toLowerCase().includes("failed");
+
+        let title;
+        let status;
+        let message;
+        let diagnosis;
+        let type;
+
+        if (backupFailure) {
+            title = "Verified Backup Unavailable";
+            status = "RECOVERY FAILED";
+
+            message = backupFailure.reason ||
+                "No verified backup is available. The record was not automatically restored.";
+
+            diagnosis =
+                "Automatic recovery was stopped to protect data integrity. " +
+                "A verified backup or manual data restoration is required.";
+
+            type = "failed";
+
+        } else if (recoveryFailed) {
+            title = "Recovery Incomplete";
+            status = "RECOVERY FAILED";
+
+            message = result.message ||
+                "One or more failures could not be recovered.";
+
+            diagnosis =
+                "Check the recovery details and incident records to identify what remains unresolved.";
+
+            type = "failed";
+
+        } else if (recovered.length > 0) {
+            title = "System Recovery Completed";
+            status = "RECOVERY SUCCESSFUL";
+
+            message = result.message ||
+                "The recovery process reported successful recovery.";
+
+            diagnosis =
+                "Review the health status and incident history to verify the final system state.";
+
+            type = "success";
+
+        } else {
+            title = "Recovery Check Completed";
+
+            status = String(
+                result.status || "CHECK COMPLETED"
+            ).toUpperCase();
+
+            message = result.message ||
+                "The backend completed its recovery check.";
+
+            diagnosis =
+                "No confirmed recovery was reported. Review the incident details before declaring the system healthy.";
+
+            type = "running";
+        }
+
+        renderChaosStatus({
+            title,
+            status,
+            message,
+            diagnosis,
+            type,
+            evidence: {
+                recovered,
+                failed,
+                active_failures: activeFailures
+            }
+        });
+
+        await refreshHealth();
+
+        if (adminToken) {
+            await loadIncidents();
+        }
+
+    } catch (error) {
+        renderChaosStatus({
+            title: "Recovery Request Failed",
+            status: "RECOVERY ERROR",
+            message: error.message,
+            diagnosis:
+                "Check the backend logs and recovery endpoint response.",
+            type: "error"
+        });
+
+    } finally {
+        chaosBusy = false;
+        button.disabled = false;
+        button.textContent = originalText;
+    }
+}
+
+function initRecoveryButtons() {
+    $("#recoverSystemButton")?.addEventListener("click", function () {
+        handleRecovery(this);
+    });
+
+    $("#healthRecoverButton")?.addEventListener("click", function () {
+        handleRecovery(this);
     });
 }
 
@@ -831,21 +1164,27 @@ function initFooterLinks() {
 
     $("#footerHealthLink")?.addEventListener("click", (event) => {
         event.preventDefault();
+
         if (!adminToken) return openLoginModal();
+
         showAdminWorkspace();
         openAdminView("health");
     });
 
     $("#footerIncidentLink")?.addEventListener("click", (event) => {
         event.preventDefault();
+
         if (!adminToken) return openLoginModal();
+
         showAdminWorkspace();
         openAdminView("incidents");
     });
 
     $("#footerChaosLink")?.addEventListener("click", (event) => {
         event.preventDefault();
+
         if (!adminToken) return openLoginModal();
+
         showAdminWorkspace();
         openAdminView("chaos");
     });
@@ -860,6 +1199,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initResultSearch();
     initHealthButtons();
     initStudentManagement();
+    initRecoveryButtons();
     initIncidentButtons();
     initChaosLab();
     initFooterLinks();
@@ -869,40 +1209,3 @@ document.addEventListener("DOMContentLoaded", () => {
     refreshHealth();
 });
 
-
-async function handleRecovery(button) {
-    if (!adminToken) {
-        openLoginModal();
-        return;
-    }
-
-    button.disabled = true;
-    button.textContent = "Recovering...";
-
-    try {
-        const result = await apiRequest(
-            "/api/self-healing/recover",
-            { method: "POST" }
-        );
-
-        alert(result.message || "Recovery check completed.");
-
-        await refreshHealth();
-        await loadIncidents();
-    } catch (error) {
-        alert("Recovery failed: " + error.message);
-    } finally {
-        button.disabled = false;
-        button.textContent = "Recover System →";
-    }
-}
-
-document.getElementById("recoverSystemButton")
-    ?.addEventListener("click", function () {
-        handleRecovery(this);
-    });
-
-document.getElementById("healthRecoverButton")
-    ?.addEventListener("click", function () {
-        handleRecovery(this);
-    });
