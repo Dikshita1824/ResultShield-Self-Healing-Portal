@@ -2514,3 +2514,84 @@ input:focus {
         width: 100%;
     }
 }
+
+/* ---------- CHAOS LAB FAILURE / RECOVERY STATUS ---------- */
+
+.chaos-status {
+    display: block;
+    width: 100%;
+    margin: 20px 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+}
+
+.chaos-status-card {
+    padding: 24px;
+    border: 1px solid #b91c1c;
+    border-left: 5px solid #ef4444;
+    border-radius: 14px;
+    background: rgba(127, 29, 29, 0.12);
+    overflow-wrap: anywhere;
+}
+
+.chaos-status-card h3 {
+    margin: 12px 0;
+    font-size: 1.25rem;
+}
+
+.chaos-status-card p {
+    margin: 10px 0;
+    line-height: 1.6;
+}
+
+.chaos-status-label {
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    color: #f87171;
+}
+
+.chaos-status-card pre {
+    margin-top: 10px;
+    padding: 14px;
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    font-size: 0.85rem;
+}
+
+.chaos-status-success .chaos-status-card {
+    border-color: #16a34a;
+    border-left-color: #22c55e;
+    background: rgba(22, 163, 74, 0.10);
+}
+
+.chaos-status-success .chaos-status-label {
+    color: #4ade80;
+}
+
+.chaos-status-running .chaos-status-card {
+    border-color: #ca8a04;
+    border-left-color: #eab308;
+    background: rgba(202, 138, 4, 0.10);
+}
+
+.chaos-status-running .chaos-status-label {
+    color: #facc15;
+}
+
+.chaos-status-error .chaos-status-card {
+    border-color: #ea580c;
+    border-left-color: #f97316;
+    background: rgba(234, 88, 12, 0.10);
+}
+
+.chaos-status-error .chaos-status-label {
+    color: #fb923c;
+}
+
