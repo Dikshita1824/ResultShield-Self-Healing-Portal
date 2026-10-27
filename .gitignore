@@ -22,3 +22,5 @@
 # Logs and editor files
 *.log
 .vscode/
+
+**/.venv*/
